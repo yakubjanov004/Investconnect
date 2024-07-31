@@ -10,4 +10,6 @@ class UserModelListAPIView(ListAPIView):
     serializer_class = serializers.UserModelSerializers
     queryset = models.UserModel.objects.all()
 
-
+class ProductListAPIView(ListAPIView):
+    serializer_class = serializers.ProductListSerializers
+    queryset = models.Product.objects.all()

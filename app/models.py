@@ -14,7 +14,7 @@ class UserModel(BaseModel):
 
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
-    phonenumber = models.IntegerField()
+    phonenumber = models.CharField(max_length=15) 
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
 
@@ -25,8 +25,6 @@ class Contract(BaseModel):
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     contract = models.TextField()
 
-    def __str__(self):
-        return self.user
 
 class Category(BaseModel):
     name = models.CharField(max_length=100)
@@ -48,20 +46,14 @@ class Product(BaseModel):
     contract = models.ForeignKey(Contract, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.user
+        return self.name
 
 class Information(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     key = models.CharField(max_length=50)
     value = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.product
-
 class Comment(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     description = models.TextField()
-
-    def __str__(self):
-        return self.product
