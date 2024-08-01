@@ -13,3 +13,7 @@ class UserModelListAPIView(ListAPIView):
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializers
     queryset = models.Product.objects.all()
+
+class CommentListAPIView(ListAPIView):
+    serializer_class = serializers.CommentSerializers
+    queryset = models.Comment.objects.all()
