@@ -17,3 +17,15 @@ class ProductListAPIView(ListAPIView):
 class CommentListAPIView(ListAPIView):
     serializer_class = serializers.CommentSerializers
     queryset = models.Comment.objects.all()
+
+class ProductCreateAPIView(CreateAPIView):
+    serializer_class = serializers.CreatProductSerializers
+    queryset = models.Product.objects.all()
+
+class RegistrCreateAPIView(CreateAPIView):
+    serializer_class = serializers.RegistrSerializers
+    queryset = models.UserModel.objects.all()
+
+class UserUpdateAPIView(UpdateAPIView):
+    serializer_class = serializers.UserUpdateSerializer
+    queryset = models.UserModel.objects.all()
