@@ -47,3 +47,22 @@ class CommentSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.Comment
         exclude = ("created_at", "updated_at")
+
+class CreatProductSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        exclude = ("created_at", "updated_at")
+
+class RegistrSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserModel
+        exclude = ("created_at", "updated_at")
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserModel
+        fields = (
+            'firstname',
+            'lastname',
+            'phonenumber',
+            )
