@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.utils.translation import gettext_lazy as _
+from django.utils.deconstruct import deconstructible
+from django.core import validators
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -7,19 +11,91 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-class UserModel(BaseModel):
+@deconstructible
+class UnicodePhoneValidator(validators.RegexValidator):
+    regex = r"^\+998\d{9}$"
+    message = _(
+        "Yaroqli telefon raqamini kiriting. Format: +998XXXXXXXXX (aniq 13 ta belgi)."
+    )
+    flags = 0
+
+
+phone_validator = UnicodePhoneValidator()
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, phone, password=None, **extra_fields):
+        if not phone:
+            raise ValueError(_('The Phone field must be set'))
+        phone = self.normalize_phone(phone)
+        user = self.model(phone=phone, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, phone, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(_('Superuser must have is_staff=True.'))
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(_('Superuser must have is_superuser=True.'))
+
+        return self.create_user(phone, password, **extra_fields)
+    
+    def normalize_phone(self, phone):
+        return phone
+
+
+class UserModel(AbstractUser):
     class RoleChoicess(models.TextChoices):
         INVESTOR = 'investor', 'Investor'
         CREATOR = 'creator', 'Creator'
-
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
-    phonenumber = models.CharField(max_length=15) 
+    username = None
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
+    phone = models.CharField(
+        _("phone"),
+        max_length=13,  
+        unique=True,
+        help_text=_("Majburiy. Format: +998XXXXXXXXX."),
+        validators=[phone_validator],  
+        error_messages={
+        "unique": _("Bu telefon raqamiga ega foydalanuvchi allaqachon mavjud."),
+    },
+)
+
+
+    class UserAuthStatus(models.TextChoices):
+        NEW = "new", "Yangi"
+        APPROVED = "approwed", "Tasdiqlangan"
+
+    USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = []
+ 
+    objects = CustomUserManager()
+    status = models.CharField(
+        max_length=100,
+        choices=UserAuthStatus.choices,
+          default=UserAuthStatus.NEW
+    )
+    code = models.CharField(max_length=4, null=True)
+    expire_date = models.DateTimeField(null=True)
+
+    def generate_verification_code(self):
+            from datetime import datetime, timedelta
+            import random
+            self.code = ''.join([str(random.randint(0, 9)) for _ in range(4)])
+            self.expire_date = datetime.now() + timedelta(minutes=1)
+    
 
     def __str__(self):
-        return self.firstname
+        return f"{self.id} - {self.firstname}"
+
+
 
 class Contract(BaseModel):
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
