@@ -1,11 +1,41 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
+from .models import UserModel
 from app import models
-######## USER
-class UserModelSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = models.UserModel
-        exclude = ("created_at", "updated_at")
+from django.core.validators import RegexValidator
+from app.models import phone_validator 
 
+######## USER
+class Userserializer(serializers.Serializer):
+    phone = serializers.CharField(validators=[
+        RegexValidator(
+            regex=r"^\+998\d{9}$",
+            message="Telefon raqam formati noto‘g‘ri. Format: +998XXXXXXXXX"
+        )
+    ])
+    password = serializers.CharField(write_only=True)
+
+class VerifySerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
+    code = serializers.CharField()
+
+class LoginSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        phone = data.get('phone')
+        password = data.get('password')
+
+        if phone and password:
+            user = authenticate(request=self.context.get('request'), phone=phone, password=password)
+            if not user:
+                raise serializers.ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
+        else:
+            raise serializers.ValidationError({"error": "Telefon raqam va parolni kiriting."})
+
+        data['user'] = user
+        return data
 ######## PRODUCT
 class ContractNameSerializer(serializers.ModelSerializer):
 
@@ -64,5 +94,5 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = (
             'firstname',
             'lastname',
-            'phonenumber',
+            'phone',
             )
