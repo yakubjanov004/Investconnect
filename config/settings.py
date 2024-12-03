@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'app',
     'rest_framework_swagger',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
     'django_filters',
 ]
@@ -95,3 +96,4 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'app.UserModel'
