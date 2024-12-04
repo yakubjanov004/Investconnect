@@ -6,13 +6,14 @@ from django.core import validators
 from django.core.validators import RegexValidator
 
 
-# BaseModel - barcha modellar uchun umumiy maydonlar
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         abstract = True
+
+
 
 @deconstructible
 class UnicodePhoneValidator(validators.RegexValidator):
@@ -74,6 +75,7 @@ class UserModel(BaseModel):
 )
 
 
+
     class UserAuthStatus(models.TextChoices):
         NEW = "new", "Yangi"
         APPROVED = "approwed", "Tasdiqlangan"
@@ -108,7 +110,7 @@ class UserModel(BaseModel):
         max_length=20,
         validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Enter a valid phone number.")],
     )
-    email = models.EmailField(unique=True)  # Unikal email
+    email = models.EmailField(unique=True) 
     role = models.CharField(max_length=30, choices=RoleChoices.choices)
 
     def __str__(self):
@@ -116,7 +118,6 @@ class UserModel(BaseModel):
 
 
 
-# Contract - foydalanuvchilar bilan tuzilgan shartnomalar
 class Contract(BaseModel):
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, related_name='contracts')
     contract = models.TextField(verbose_name='Contract Details')
@@ -125,7 +126,7 @@ class Contract(BaseModel):
         return f"Contract with {self.user.firstname}"
 
 
-# Category - mahsulotlar uchun kategoriyalar
+
 class Category(BaseModel):
     name = models.CharField(max_length=100, unique=True)
 
@@ -133,7 +134,7 @@ class Category(BaseModel):
         return self.name
 
 
-# Product - foydalanuvchilar mahsulotlari
+
 class Product(BaseModel):
     class DegreeChoices(models.TextChoices):
         BRONZE = 'bronze', 'Bronze'
@@ -151,25 +152,24 @@ class Product(BaseModel):
         return self.name
 
 
-# Information - mahsulot haqida qo'shimcha ma'lumotlar
+
 class Information(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='information')
-    key = models.CharField(max_length=100)  # Kengroq maydon
+    key = models.CharField(max_length=100) 
     value = models.CharField(max_length=100)
 
     def __str__(self):
         return f"{self.key}: {self.value}"
 
 
-# Comment - mahsulotlar uchun foydalanuvchi izohlari
+
 class Comment(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='comments')
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, related_name='comments')
     description = models.TextField()
 
     class Meta:
-        unique_together = ('product', 'user')  # Har bir foydalanuvchi faqat bitta izoh qoldirishi mumkin
+        unique_together = ('product', 'user') 
 
     def __str__(self):
-        return f"Comment by {self.user.firstname} on {self.product.name}"
-    
+        return f"Comment by {self.user.firstname} on {self.product.name}" 
