@@ -106,8 +106,6 @@ class UserModel(BaseModel):
         return f"{self.id} - {self.firstname}"
 
 
-        return f"{self.firstname} {self.lastname}"
-
 
 # Contract - foydalanuvchilar bilan tuzilgan shartnomalar
 class Contract(BaseModel):
