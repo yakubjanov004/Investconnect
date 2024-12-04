@@ -51,10 +51,7 @@ class CustomUserManager(BaseUserManager):
         return phone
 
 
-class UserModel(AbstractUser):
-    class RoleChoicess(models.TextChoices):
 
-# UserModel - foydalanuvchilar uchun model
 class UserModel(BaseModel):
     class RoleChoices(models.TextChoices):
         INVESTOR = 'investor', 'Investor'
@@ -63,7 +60,7 @@ class UserModel(BaseModel):
     lastname = models.CharField(max_length=50)
     username = None
     email = models.EmailField()
-    role = models.CharField(max_length=30, choices=RoleChoicess.choices)
+    role = models.CharField(max_length=30, choices=RoleChoices.choices)
     phone = models.CharField(
         _("phone"),
         max_length=13,  
