@@ -35,6 +35,7 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+    
 
     def create_superuser(self, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
@@ -94,6 +95,14 @@ class UserModel(BaseModel):
             import random
             self.code = ''.join([str(random.randint(0, 9)) for _ in range(4)])
             self.expire_date = datetime.now() + timedelta(minutes=1)
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
     
     phonenumber = models.CharField(
         max_length=20,
@@ -105,8 +114,6 @@ class UserModel(BaseModel):
     def __str__(self):
         return f"{self.id} - {self.firstname}"
 
-
-        return f"{self.firstname} {self.lastname}"
 
 
 # Contract - foydalanuvchilar bilan tuzilgan shartnomalar

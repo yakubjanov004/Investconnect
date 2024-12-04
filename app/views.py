@@ -88,7 +88,7 @@ from django.contrib.auth.models import AnonymousUser
 from app.models import Product, UserModel
 
 class ProductListAPIView(ListAPIView):
-    serializer_class = serializers.ProductListSerializers
+    serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
     filter_backends =  [DjangoFilterBackend,SearchFilter]
     filterset_fields = ('degree',)
