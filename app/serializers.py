@@ -23,6 +23,7 @@ from app.models import phone_validator
 
 
 class Userserializer(serializers.Serializer):
+    username = serializers.CharField(max_length=35)
     phone = serializers.CharField(validators=[
         RegexValidator(
             regex=r"^\+998\d{9}$",
