@@ -7,19 +7,12 @@ from django.db.utils import IntegrityError
 from .serializers import Userserializer,VerifySerializer, LoginSerializer
 from rest_framework.views import APIView,Response
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import (
-    ListAPIView, 
-    CreateAPIView, 
-    UpdateAPIView, 
-    RetrieveAPIView, 
-    RetrieveUpdateAPIView
-)
-from rest_framework.views import APIView, Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
+from rest_framework import generics
 
 class UserRegister(APIView):
     permission_classes = [AllowAny]
@@ -28,6 +21,7 @@ class UserRegister(APIView):
         serializer = Userserializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        username = serializer.validated_data.get('username')
         phone = serializer.validated_data.get('phone')
         password = serializer.validated_data.get('password')
 
@@ -35,7 +29,7 @@ class UserRegister(APIView):
             raise serializers.ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         try:
-            user = UserModel.objects.create(phone=phone)
+            user = UserModel.objects.create(phone=phone, username=username)
             user.set_password(password)
             user.generate_verification_code()  
             user.save()
@@ -95,11 +89,6 @@ class ProductListAPIView(ListAPIView):
     filterset_fields = ('degree',)
     search_fields = ('name',)
 
-    serializer_class = serializers.ProductListSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ('degree',)
-    search_fields = ('name',)
-
     def get_queryset(self):
         user = self.request.user
         if isinstance(user, AnonymousUser):
@@ -139,3 +128,9 @@ class UserUpdateAPIView(UpdateAPIView):
 
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
+
+
+class ProductDetail(generics.RetrieveAPIView):
+    queryset = Product.objects.all()  # Barcha mahsulotlar
+    serializer_class = serializers.ProductDetailSerializer  # Mahsulotlar uchun serializer
+    lookup_field = 'id'

@@ -117,3 +117,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'lastname',
             'phone',
             )
+class ProductDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        fields = "__all__"
