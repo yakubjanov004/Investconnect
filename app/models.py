@@ -118,3 +118,4 @@ class Information(BaseModel):
 class Comment(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
+    description = models.TextField()
