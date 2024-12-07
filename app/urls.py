@@ -2,12 +2,13 @@ from django.urls import path
 from app import views 
 
 urlpatterns = [
-    path('product-list/', views.ProductListAPIView.as_view()),
-    path('comment-list/', views.ProductListAPIView.as_view()),
-    path('creat-prduct/', views.ProductCreateAPIView.as_view()),
-    path('user-update/<int:pk>/', views.UserUpdateAPIView.as_view()),
-    path('register/', views.UserRegister.as_view(), name='register'),
-    path('verify/', views.VerifyAPIView.as_view(), name='verify'),
-    path('login/', views.LoginAPIView.as_view(), name='login')
 
+    path('users/update/<int:pk>/', views.UserUpdateAPIView.as_view(), name='user-update'),
+    path('users/register/', views.UserRegister.as_view(), name='user-register'),
+    path('users/verify/', views.VerifyAPIView.as_view(), name='user-verify'),
+    path('users/login/', views.LoginAPIView.as_view(), name='user-login'),
+
+    path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
+    path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),
+    path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
 ]
