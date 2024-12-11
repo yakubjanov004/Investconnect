@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView,CreateAPIView,UpdateAPIView
+from rest_framework.generics import ListAPIView,CreateAPIView,UpdateAPIView,RetrieveUpdateAPIView
 from app import serializers
 from app import models
 from .models import UserModel
@@ -134,3 +134,7 @@ class ProductDetail(generics.RetrieveAPIView):
     queryset = Product.objects.all()  # Barcha mahsulotlar
     serializer_class = serializers.ProductDetailSerializer  # Mahsulotlar uchun serializer
     lookup_field = 'id'
+
+class ProfilDetailAPIView(RetrieveUpdateAPIView):
+    serializer_class = serializers.ProfilDetailSerializers
+    queryset = models.UserModel.objects.all()

@@ -122,3 +122,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = "__all__"
+
+class ProfilDetailSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.UserModel
+        fields = ('firstname', 'lastname', 'phonenumber', 'email', 'role')
