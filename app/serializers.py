@@ -7,8 +7,7 @@ from rest_framework.exceptions import ValidationError
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
-        fields = ('id', 'firstname', 'lastname', 'phonenumber', 'email', 'role')
-
+        fields = ('id', 'firstname', 'phone', 'lastname', 'email', 'role')
 
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,7 +107,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
-        fields = ('firstname', 'lastname', 'phonenumber', 'email', 'role')
+        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
 
 
 
@@ -129,4 +128,4 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = models.UserModel
-        fields = ('firstname', 'lastname', 'phonenumber', 'email', 'role')
+        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
