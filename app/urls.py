@@ -9,6 +9,7 @@ urlpatterns = [
     path('users/verify/', views.VerifyAPIView.as_view(), name='user-verify'),
     path('users/login/', views.LoginAPIView.as_view(), name='user-login'),
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
+    path('users/get/', views.GetUserAPI.as_view(), name='get-user'),
 
     path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),

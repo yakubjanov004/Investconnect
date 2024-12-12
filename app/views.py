@@ -15,6 +15,7 @@ from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 class UserRegister(APIView):
     permission_classes = [AllowAny]
@@ -62,6 +63,21 @@ class CodeAPI(APIView):
             return Response({
                 "detail": "Verifikatsiya kodi topilmadi."
             }, status=status.HTTP_404_NOT_FOUND)
+        
+class GetUserAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user  
+            user_data = {
+                "username": user.username,
+                "phone": user.phone,
+                "email": user.email,
+            }
+            return Response(user_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
