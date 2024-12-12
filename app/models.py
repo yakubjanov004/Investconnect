@@ -114,6 +114,8 @@ class Product(BaseModel):
     name = models.CharField(max_length=50)
     image = models.ImageField(upload_to="products/")
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    rendement = models.CharField(max_length=5)
+    location = models.CharField(max_length=100)
     degree = models.CharField(max_length=30, choices=DegreeChoicess.choices, default=DegreeChoicess.BRONZE)
     description = models.TextField()
     contract = models.ForeignKey(Contract, on_delete=models.PROTECT)

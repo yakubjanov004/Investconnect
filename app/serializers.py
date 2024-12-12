@@ -81,7 +81,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree', 'image', 'description', 'user', 'contract', 'category'
+            'id', 'name', 'degree', 'rendement','location', 'image', 'description', 'user', 'contract', 'category'
         )
 
 
@@ -89,7 +89,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
-        fields = ('user','name', 'image', 'description', 'category', 'contract')
+        fields = ('user','name', 'rendement','location', 'image', 'description', 'category', 'contract')
 
 
 
