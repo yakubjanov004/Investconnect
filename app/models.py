@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.utils.deconstruct import deconstructible
 from django.core import validators
+from django.core.validators import RegexValidator
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -45,8 +46,16 @@ class UserModel(AbstractUser):
         CREATOR = 'creator', 'Creator'
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
-    phonenumber = models.CharField(max_length=15) 
-    username = models.CharField(max_length=35)
+    username = models.CharField(
+        max_length=35,
+        unique=True,  
+        validators=[
+            RegexValidator(
+                regex=r'^[A-Za-z0-9]+$',
+                message=_("Username faqat lotin harflari va raqamlardan iborat bo‘lishi kerak. Joy tashlashga ruxsat yo‘q.")
+            )
+        ],
+    )
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
     phone = models.CharField(
@@ -71,13 +80,13 @@ class UserModel(AbstractUser):
         choices=UserAuthStatus.choices,
           default=UserAuthStatus.NEW
     )
-    code = models.CharField(max_length=4, null=True)
+    code = models.CharField(max_length=6, null=True)  
     expire_date = models.DateTimeField(null=True)
     def generate_verification_code(self):
-            from datetime import datetime, timedelta
-            import random
-            self.code = ''.join([str(random.randint(0, 9)) for _ in range(4)])
-            self.expire_date = datetime.now() + timedelta(minutes=1)
+        from datetime import datetime, timedelta
+        import random
+        self.code = ''.join([str(random.randint(0, 9)) for _ in range(6)])  
+        self.expire_date = datetime.now() + timedelta(minutes=1)
     
 
     def __str__(self):
@@ -102,6 +111,7 @@ class Product(BaseModel):
 
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     name = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="products/")
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     degree = models.CharField(max_length=30, choices=DegreeChoicess.choices, default=DegreeChoicess.BRONZE)
     description = models.TextField()

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import UserModel
 from app import models
+from rest_framework.exceptions import ValidationError
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,6 +25,7 @@ from app.models import phone_validator
 
 class Userserializer(serializers.Serializer):
     username = serializers.CharField(max_length=35)
+    role = serializers.CharField(max_length=35)
     phone = serializers.CharField(validators=[
         RegexValidator(
             regex=r"^\+998\d{9}$",
@@ -47,9 +49,9 @@ class LoginSerializer(serializers.Serializer):
         if phone and password:
             user = authenticate(request=self.context.get('request'), phone=phone, password=password)
             if not user:
-                raise serializers.ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
+                raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
         else:
-            raise serializers.ValidationError({"error": "Telefon raqam va parolni kiriting."})
+            raise ValidationError({"error": "Telefon raqam va parolni kiriting."})
 
         data['user'] = user
         return data

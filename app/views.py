@@ -13,6 +13,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 
 class UserRegister(APIView):
     permission_classes = [AllowAny]
@@ -22,22 +23,31 @@ class UserRegister(APIView):
         serializer.is_valid(raise_exception=True)
 
         username = serializer.validated_data.get('username')
+        role = serializer.validated_data.get('role')
         phone = serializer.validated_data.get('phone')
         password = serializer.validated_data.get('password')
 
         if UserModel.objects.filter(phone=phone, status='approwed').exists():
-            raise serializers.ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
+            raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         try:
-            user = UserModel.objects.create(phone=phone, username=username)
+            user = UserModel.objects.create(phone=phone, username=username,role=role)
             user.set_password(password)
             user.generate_verification_code()  
             user.save()
 
             return Response(data={"user": user.id}, status=201)
 
-        except IntegrityError:
-            raise serializers.ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
+        # except IntegrityError:
+        #     raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
+        except IntegrityError as e:
+
+            if "username" in str(e):
+                raise ValidationError({"error": "Bunday username allaqachon mavjud."})
+            elif "phone" in str(e):
+                raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
+            else:
+                raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
@@ -50,7 +60,7 @@ class VerifyAPIView(APIView):
         code = serializer.validated_data.get('code')
 
         if timezone.now() > user.expire_date or code != user.code:
-            raise serializers.ValidationError({"error": "Kod eskirgan yoki noto‘g‘ri."})
+            raise ValidationError({"error": "Kod eskirgan yoki noto‘g‘ri."})
 
         user.status = 'approwed'
         user.save()
