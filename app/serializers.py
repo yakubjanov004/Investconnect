@@ -8,7 +8,7 @@ class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('id', 'firstname', 'phone', 'lastname', 'email', 'role')
-        
+
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
@@ -81,7 +81,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree', 'description', 'user', 'contract', 'category'
+            'id', 'name', 'degree', 'image', 'description', 'user', 'contract', 'category'
         )
 
 
@@ -89,7 +89,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
-        fields = ('user','name', 'degree', 'description', 'category', 'contract')
+        fields = ('user','name', 'image', 'description', 'category', 'contract')
 
 
 

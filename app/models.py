@@ -43,7 +43,7 @@ class CustomUserManager(BaseUserManager):
 class UserModel(AbstractUser):
     class RoleChoicess(models.TextChoices):
         INVESTOR = 'investor', 'Investor'
-        CREATOR = 'creator', 'Creator'
+        STARTUP = 'startup', 'Startup'
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
     username = models.CharField(

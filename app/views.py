@@ -141,8 +141,8 @@ class UserUpdateAPIView(UpdateAPIView):
 
 
 class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()  # Barcha mahsulotlar
-    serializer_class = serializers.ProductDetailSerializer  # Mahsulotlar uchun serializer
+    queryset = Product.objects.all()  
+    serializer_class = serializers.ProductDetailSerializer  
     lookup_field = 'id'
 
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
