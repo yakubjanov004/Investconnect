@@ -109,10 +109,9 @@ class LoginAPIView(APIView):
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response({"token": token.key, "user": user.id})
+    
+    
 from app import serializers, models
-
-
-
 
 class UserModelListAPIView(ListAPIView):
     serializer_class = serializers.UserModelSerializer

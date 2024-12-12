@@ -38,22 +38,23 @@ class VerifySerializer(serializers.Serializer):
     code = serializers.CharField()
 
 class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        phone = data.get('phone')
+        username = data.get('username')
         password = data.get('password')
 
-        if phone and password:
-            user = authenticate(request=self.context.get('request'), phone=phone, password=password)
+        if username and password:
+            user = authenticate(request=self.context.get('request'), username=username, password=password)
             if not user:
-                raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
+                raise ValidationError({"error": "Notog'ri foydalanuvchi nomi yoki parol."})
         else:
-            raise ValidationError({"error": "Telefon raqam va parolni kiriting."})
+            raise ValidationError({"error": "Foydalanuvchi nomi va parolni kiriting."})
 
         data['user'] = user
         return data
+
 
 
 
