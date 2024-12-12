@@ -49,8 +49,7 @@ class UserModel(AbstractUser):
     username = models.CharField(
         max_length=35,
         unique=True, 
-        blank=True,
-        null=True, 
+        blank=True, 
         validators=[
             RegexValidator(
                 regex=r'^[A-Za-z0-9]+$',
