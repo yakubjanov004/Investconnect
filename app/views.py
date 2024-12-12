@@ -14,6 +14,7 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
+from rest_framework import status
 
 class UserRegister(APIView):
     permission_classes = [AllowAny]
@@ -38,8 +39,6 @@ class UserRegister(APIView):
 
             return Response(data={"user": user.id}, status=201)
 
-        # except IntegrityError:
-        #     raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
         except IntegrityError as e:
 
             if "username" in str(e):
@@ -48,6 +47,21 @@ class UserRegister(APIView):
                 raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
             else:
                 raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
+            
+class CodeAPI(APIView):
+
+    def get(self, request, user_id):
+        user = get_object_or_404(UserModel, id=user_id)
+
+        if user.code:
+            return Response({
+                "id": user.id,
+                "verification_code": user.code,
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "detail": "Verifikatsiya kodi topilmadi."
+            }, status=status.HTTP_404_NOT_FOUND)
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
