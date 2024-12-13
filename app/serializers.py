@@ -38,7 +38,7 @@ class VerifySerializer(serializers.Serializer):
     code = serializers.CharField()
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=50)
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):

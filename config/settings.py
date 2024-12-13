@@ -38,6 +38,11 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://bakirali007.pythonanywhere.com/',   
+]
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
