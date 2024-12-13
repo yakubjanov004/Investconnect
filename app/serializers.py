@@ -86,15 +86,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name', 'degree','image','category'
         )
 
-class ProductyanaListSerializer(serializers.ModelSerializer):
-    category = GetCategorySerializer(read_only=True)
-
-    class Meta:
-        model = models.Product
-        fields = (
-            'id', 'name', 'degree','image','category'
-        )
-
 
 
 class CreateProductSerializer(serializers.ModelSerializer):

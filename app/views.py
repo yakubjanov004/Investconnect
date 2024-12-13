@@ -128,31 +128,6 @@ class ProductListAPIView(ListAPIView):
     filterset_fields = ('degree',)
     search_fields = ('name',)
 
-    def get_queryset(self):
-        user = self.request.user
-        if isinstance(user, AnonymousUser):
-            return Product.objects.none()  
-        try:
-            user_instance = UserModel.objects.get(id=user.id)
-            return Product.objects.filter(user=user_instance)
-        except UserModel.DoesNotExist:
-            return Product.objects.none()
-        
-class ProductyanaListAPIView(ListAPIView):
-    serializer_class = serializers.ProductyanaListSerializer
-    queryset = models.Product.objects.all()
-
-    def get_queryset(self):
-        user = self.request.user
-        if isinstance(user, AnonymousUser):
-            return Product.objects.none()  
-        try:
-            user_instance = UserModel.objects.get(id=user.id)
-            return Product.objects.filter(user=user_instance)
-        except UserModel.DoesNotExist:
-            return Product.objects.none()
-
-
 
 class CommentListAPIView(ListAPIView):
     serializer_class = serializers.CommentSerializer
