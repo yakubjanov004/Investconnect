@@ -102,7 +102,7 @@ class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data['user']
@@ -127,6 +127,20 @@ class ProductListAPIView(ListAPIView):
     filter_backends =  [DjangoFilterBackend,SearchFilter]
     filterset_fields = ('degree',)
     search_fields = ('name',)
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return Product.objects.none()  
+        try:
+            user_instance = UserModel.objects.get(id=user.id)
+            return Product.objects.filter(user=user_instance)
+        except UserModel.DoesNotExist:
+            return Product.objects.none()
+        
+class ProductyanaListAPIView(ListAPIView):
+    serializer_class = serializers.ProductyanaListSerializer
+    queryset = models.Product.objects.all()
 
     def get_queryset(self):
         user = self.request.user

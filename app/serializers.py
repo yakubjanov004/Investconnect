@@ -45,12 +45,13 @@ class LoginSerializer(serializers.Serializer):
         username = data.get('username')
         password = data.get('password')
 
+        if not username or not password:
+            raise ValidationError({"error": "Foydalanuvchi nomi va parolni kiriting."})
+
         if username and password:
             user = authenticate(request=self.context.get('request'), username=username, password=password)
             if not user:
                 raise ValidationError({"error": "Notog'ri foydalanuvchi nomi yoki parol."})
-        else:
-            raise ValidationError({"error": "Foydalanuvchi nomi va parolni kiriting."})
 
         data['user'] = user
         return data
@@ -75,14 +76,23 @@ class GetCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    user = GetUserSerializer(read_only=True)
-    contract = ContractNameSerializer(read_only=True)
+    # user = GetUserSerializer(read_only=True)
+    # contract = ContractNameSerializer(read_only=True)
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree', 'rendement','location', 'image', 'description', 'user', 'contract', 'category'
+            'id', 'name', 'degree','image','category'
+        )
+
+class ProductyanaListSerializer(serializers.ModelSerializer):
+    category = GetCategorySerializer(read_only=True)
+
+    class Meta:
+        model = models.Product
+        fields = (
+            'id', 'name', 'degree','image','category'
         )
 
 
