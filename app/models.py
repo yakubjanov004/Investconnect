@@ -46,17 +46,6 @@ class UserModel(AbstractUser):
         STARTUP = 'startup', 'Startup'
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
-    username = models.CharField(
-        max_length=35,
-        unique=True, 
-        blank=True, 
-        validators=[
-            RegexValidator(
-                regex=r'^[A-Za-z0-9]+$',
-                message=_("Username faqat lotin harflari va raqamlardan iborat bo‘lishi kerak. Joy tashlashga ruxsat yo‘q.")
-            )
-        ],
-    )
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
     phone = models.CharField(

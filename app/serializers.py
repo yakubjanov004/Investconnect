@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from .models import UserModel
 from app import models
 from rest_framework.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,14 +17,7 @@ class GetUserSerializer(serializers.ModelSerializer):
         read_only = True
 
 
-
-from django.core.validators import RegexValidator
-from app.models import phone_validator 
-
-
-
 class Userserializer(serializers.Serializer):
-    username = serializers.CharField(max_length=35)
     role = serializers.CharField(max_length=35)
     phone = serializers.CharField(validators=[
         RegexValidator(
@@ -38,24 +32,23 @@ class VerifySerializer(serializers.Serializer):
     code = serializers.CharField()
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        username = data.get('username')
+        phone = data.get('phone')
         password = data.get('password')
 
-        if not username or not password:
-            raise ValidationError({"error": "Foydalanuvchi nomi va parolni kiriting."})
+        if not phone or not password:
+            raise ValidationError({"error": "Telefon raqam va parolni kiriting."})
 
-        if username and password:
-            user = authenticate(request=self.context.get('request'), username=username, password=password)
+        if phone and password:
+            user = authenticate(request=self.context.get('request'), username=phone, password=password)
             if not user:
-                raise ValidationError({"error": "Notog'ri foydalanuvchi nomi yoki parol."})
+                raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
 
         data['user'] = user
         return data
-
 
 
 
@@ -95,14 +88,12 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
 
 
-
 class CommentSerializer(serializers.ModelSerializer):
     user = GetUserSerializer(read_only=True)  
 
     class Meta:
         model = models.Comment
         fields = ('id', 'description', 'user', 'product')
-
 
 
 
@@ -121,10 +112,15 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'lastname',
             'phone',
             )
+        
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = "__all__"
+
+
 
 class ProfilDetailSerializers(serializers.ModelSerializer):
 

@@ -24,8 +24,6 @@ class UserRegister(APIView):
         serializer = Userserializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data.get('username')
-        role = serializer.validated_data.get('role')
         phone = serializer.validated_data.get('phone')
         password = serializer.validated_data.get('password')
 
@@ -33,18 +31,15 @@ class UserRegister(APIView):
             raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         try:
-            user = UserModel.objects.create(phone=phone, username=username,role=role)
+            user = UserModel.objects.create(phone=phone, username=phone)  
             user.set_password(password)
-            user.generate_verification_code()  
+            user.generate_verification_code()
             user.save()
 
             return Response(data={"user": user.id}, status=201)
 
         except IntegrityError as e:
-
-            if "username" in str(e):
-                raise ValidationError({"error": "Bunday username allaqachon mavjud."})
-            elif "phone" in str(e):
+            if "phone" in str(e):
                 raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
             else:
                 raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
@@ -110,16 +105,12 @@ class LoginAPIView(APIView):
 
         return Response({"token": token.key, "user": user.id})
     
-    
-from app import serializers, models
-
 class UserModelListAPIView(ListAPIView):
     serializer_class = serializers.UserModelSerializer
     queryset = models.UserModel.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]  
 
-from django.contrib.auth.models import AnonymousUser
-from app.models import Product, UserModel
+
 
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
@@ -159,7 +150,7 @@ class UserUpdateAPIView(UpdateAPIView):
 
 
 class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()  
+    queryset = models.Product.objects.all()  
     serializer_class = serializers.ProductDetailSerializer  
     lookup_field = 'id'
 
