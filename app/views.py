@@ -26,12 +26,13 @@ class UserRegister(APIView):
 
         phone = serializer.validated_data.get('phone')
         password = serializer.validated_data.get('password')
+        role = serializer.validated_data.get('role')
 
         if UserModel.objects.filter(phone=phone, status='approwed').exists():
             raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         try:
-            user = UserModel.objects.create(phone=phone, username=phone)  
+            user = UserModel.objects.create(phone=phone, username=phone, role=role)  
             user.set_password(password)
             user.generate_verification_code()
             user.save()
@@ -43,6 +44,7 @@ class UserRegister(APIView):
                 raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
             else:
                 raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
+
             
 class CodeAPI(APIView):
 
@@ -64,15 +66,23 @@ class GetUserAPI(APIView):
 
     def get(self, request):
         try:
-            user = request.user  
-            user_data = {
-                "username": user.username,
-                "phone": user.phone,
-                "email": user.email,
-            }
+            users = UserModel.objects.all() 
+            user_data = [
+                {
+                    "id": user.id,  
+                    "firstname": user.firstname,
+                    "lastname": user.lastname,
+                    "phone": user.phone,
+                    "email": user.email,
+                    "role": user.role,
+                }
+                for user in users
+            ]
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
