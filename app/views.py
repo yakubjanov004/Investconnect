@@ -94,14 +94,19 @@ class VerifyAPIView(APIView):
         user = serializer.validated_data.get('user')
         code = serializer.validated_data.get('code')
 
-        if timezone.now() > user.expire_date or code != user.code:
-            raise ValidationError({"error": "Kod eskirgan yoki noto‘g‘ri."})
+        if timezone.now() > user.expire_date:
+            user.delete()  
+            raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
+
+        if code != user.code:
+            raise ValidationError({"error": "Kod noto‘g‘ri."})
 
         user.status = 'approwed'
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
+
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
