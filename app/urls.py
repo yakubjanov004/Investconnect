@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/login/', views.LoginAPIView.as_view(), name='user-login'),
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
     path('users/get/', views.GetUserAPI.as_view(), name='get-user'),
+    path('users/profile-get/<int:user_id>/', views.GetProfileAPI.as_view(), name='get-user'),
 
     path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),

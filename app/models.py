@@ -48,6 +48,16 @@ class UserModel(AbstractUser):
     lastname = models.CharField(max_length=50)
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
+    username = models.CharField(
+        _("username"),
+        max_length=30,
+        unique=True,
+        help_text=_("Majburiy. Username faqat harflar va raqamlardan iborat bo'lishi kerak."),
+        error_messages={
+        "unique": _("Bu username ga ega foydalanuvchi allaqachon mavjud."),
+    },
+)
+
     phone = models.CharField(
         _("phone"),
         max_length=13,  
@@ -99,15 +109,18 @@ class Product(BaseModel):
         SILVER = 'silver', 'Silver'
         GOLD = 'gold', 'Gold'
 
-    user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     name = models.CharField(max_length=50)
-    image = models.ImageField(upload_to="products/")
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    rendement = models.CharField(max_length=5)
-    location = models.CharField(max_length=100)
     degree = models.CharField(max_length=30, choices=DegreeChoicess.choices, default=DegreeChoicess.BRONZE)
     description = models.TextField()
+    location = models.CharField(max_length=100)
+    image = models.ImageField(upload_to="products/")
+    user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    rendement = models.CharField(max_length=5)
     contract = models.ForeignKey(Contract, on_delete=models.PROTECT)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+
 
     def __str__(self):
         return self.name
@@ -121,3 +134,4 @@ class Comment(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     description = models.TextField()
+
