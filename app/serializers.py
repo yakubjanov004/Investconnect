@@ -16,17 +16,6 @@ class GetUserSerializer(serializers.ModelSerializer):
         fields = ('firstname', 'lastname', 'role')
         read_only = True
 
-
-# class Userserializer(serializers.Serializer):
-#     role = serializers.CharField(max_length=35)
-#     phone = serializers.CharField(validators=[
-#         RegexValidator(
-#             regex=r"^\+998\d{9}$",
-#             message="Telefon raqam formati noto‘g‘ri. Format: +998XXXXXXXXX"
-#         )
-#     ])
-#     password = serializers.CharField(write_only=True)
-
 class Userserializer(serializers.Serializer):
     username = serializers.CharField(max_length=30, validators=[ 
         RegexValidator(
@@ -144,3 +133,8 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('firstname', 'lastname', 'phone', 'email', 'role')
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Category
+        fields = ['id', 'name']

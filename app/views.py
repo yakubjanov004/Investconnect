@@ -17,38 +17,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-# class UserRegister(APIView):
-#     permission_classes = [AllowAny]
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = Userserializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-
-#         phone = serializer.validated_data.get('phone')
-#         password = serializer.validated_data.get('password')
-#         role = serializer.validated_data.get('role')
-
-#         if UserModel.objects.filter(phone=phone, status='approwed').exists():
-#             raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
-
-#         try:
-#             user = UserModel.objects.create(phone=phone, username=phone, role=role)  
-#             user.set_password(password)
-#             user.generate_verification_code()
-#             user.save()
-
-#             return Response(data={"user": user.id}, status=201)
-
-#         except IntegrityError as e:
-#             if "phone" in str(e):
-#                 raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
-#             else:
-#                 raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
-            
-#     def ochirib_yuboradi(self, user):
-#         from datetime import datetime
-#         if user.expire_date and datetime.now() > user.expire_date and user.status != 'approwed':
-#             user.delete()
 
 class UserRegister(APIView):
     permission_classes = [AllowAny]
@@ -130,10 +98,8 @@ class GetProfileAPI(APIView):
             user = UserModel.objects.get(id=user_id)  
             user_data = {
                 "id": user.id,
-                "firstname": user.firstname,
-                "lastname": user.lastname,
+                "username": user.username,               
                 "phone": user.phone,
-                "email": user.email,
                 "role": user.role,
             }
             return Response(user_data, status=status.HTTP_200_OK)
@@ -232,3 +198,8 @@ class ProductDetail(generics.RetrieveAPIView):
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
     queryset = models.UserModel.objects.all()
+
+
+class CategoryListView(generics.ListAPIView):
+    queryset = models.Category.objects.all()
+    serializer_class = serializers.CategorySerializer
