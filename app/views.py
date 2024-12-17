@@ -203,3 +203,7 @@ class ProfilDetailAPIView(RetrieveUpdateAPIView):
 class CategoryListView(generics.ListAPIView):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
+
+class CreatInformationView(generics.CreateAPIView):
+    queryset = models.Information.objects.all()
+    serializer_class = serializers.InformationSerializer

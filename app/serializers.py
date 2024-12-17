@@ -138,3 +138,8 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
         fields = ['id', 'name']
+
+class InformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Information
+        fields = ['id', 'product', 'key', 'value']

@@ -18,5 +18,7 @@ urlpatterns = [
     path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
     path('products/<int:id>/', views.ProductDetail.as_view(), name='product-detail'),
 
-    path('category/list/', views.CategoryListView.as_view(), name='category-list'),
+    path('products/category/', views.CategoryListView.as_view(), name='category-list'),
+
+    path('Information/creat', views.CreatInformationView.as_view(), name='information-creat'),
 ]
