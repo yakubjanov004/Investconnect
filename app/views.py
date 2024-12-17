@@ -157,7 +157,7 @@ class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
     filter_backends =  [DjangoFilterBackend,SearchFilter]
-    filterset_fields = ('degree',)
+    filterset_fields = ('degree','category__name')
     search_fields = ('name',)
 
 
