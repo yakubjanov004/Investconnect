@@ -137,7 +137,7 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
-        fields = ['id', 'name']
+        fields = ['id', 'name', "img"]
 
 class InformationSerializer(serializers.ModelSerializer):
     class Meta:
