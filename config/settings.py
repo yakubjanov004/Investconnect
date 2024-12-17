@@ -40,7 +40,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
-    'https://bakirali007.pythonanywhere.com/',   
+    'http://localhost:5173',
+    'https://bakirali007.pythonanywhere.com/',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -100,7 +101,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    '/var/www/static/',  
+    '/var/www/static/',
     'C:/Users/WELCOME/Documents/Project_U/Investconnect/static',
 ]
 

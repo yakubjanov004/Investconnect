@@ -16,16 +16,22 @@ class GetUserSerializer(serializers.ModelSerializer):
         fields = ('firstname', 'lastname', 'role')
         read_only = True
 
-
 class Userserializer(serializers.Serializer):
-    role = serializers.CharField(max_length=35)
+    username = serializers.CharField(max_length=30, validators=[ 
+        RegexValidator(
+            regex=r'^[a-zA-Z0-9]+$', 
+            message="Username faqat harflar va raqamlardan iborat bo'lishi kerak."
+        ),
+    ])
     phone = serializers.CharField(validators=[
         RegexValidator(
             regex=r"^\+998\d{9}$",
             message="Telefon raqam formati noto‘g‘ri. Format: +998XXXXXXXXX"
         )
     ])
+    role = serializers.CharField(max_length=35)
     password = serializers.CharField(write_only=True)
+
 
 class VerifySerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
@@ -76,7 +82,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree','image','category'
+            'id', 'name', 'degree','image','category', 'price'
         )
 
 
@@ -84,7 +90,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
-        fields = ('user','name', 'rendement','location', 'image', 'description', 'category', 'contract')
+        fields = ('user','name', 'rendement','location', 'image', 'description', 'category', 'contract', 'price')
 
 
 
@@ -127,3 +133,13 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('firstname', 'lastname', 'phone', 'email', 'role')
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Category
+        fields = ['id', 'name', "img"]
+
+class InformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Information
+        fields = ['id', 'product', 'key', 'value']

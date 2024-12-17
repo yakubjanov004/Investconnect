@@ -17,6 +17,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+
 class UserRegister(APIView):
     permission_classes = [AllowAny]
 
@@ -24,15 +25,19 @@ class UserRegister(APIView):
         serializer = Userserializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        username = serializer.validated_data.get('username')
         phone = serializer.validated_data.get('phone')
         password = serializer.validated_data.get('password')
         role = serializer.validated_data.get('role')
+
+        if UserModel.objects.filter(username=username, status='approwed').exists():
+            raise ValidationError({"error": "Bunday username bilan foydalanuvchi allaqachon mavjud."})
 
         if UserModel.objects.filter(phone=phone, status='approwed').exists():
             raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
 
         try:
-            user = UserModel.objects.create(phone=phone, username=phone, role=role)  
+            user = UserModel.objects.create(username=username, phone=phone, role=role)
             user.set_password(password)
             user.generate_verification_code()
             user.save()
@@ -40,10 +45,13 @@ class UserRegister(APIView):
             return Response(data={"user": user.id}, status=201)
 
         except IntegrityError as e:
-            if "phone" in str(e):
+            if "username" in str(e):
+                raise ValidationError({"error": "Bunday username bilan foydalanuvchi allaqachon mavjud."})
+            elif "phone" in str(e):
                 raise ValidationError({"error": "Bunday telefon raqam bilan foydalanuvchi allaqachon mavjud."})
             else:
                 raise ValidationError({"error": "Foydalanuvchini yaratishda xato yuz berdi."})
+
 
             
 class CodeAPI(APIView):
@@ -81,6 +89,24 @@ class GetUserAPI(APIView):
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class GetProfileAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = UserModel.objects.get(id=user_id)  
+            user_data = {
+                "id": user.id,
+                "username": user.username,               
+                "phone": user.phone,
+                "role": user.role,
+            }
+            return Response(user_data, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -94,14 +120,19 @@ class VerifyAPIView(APIView):
         user = serializer.validated_data.get('user')
         code = serializer.validated_data.get('code')
 
-        if timezone.now() > user.expire_date or code != user.code:
-            raise ValidationError({"error": "Kod eskirgan yoki noto‘g‘ri."})
+        if timezone.now() > user.expire_date:
+            user.delete()  
+            raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
+
+        if code != user.code:
+            raise ValidationError({"error": "Kod noto‘g‘ri."})
 
         user.status = 'approwed'
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
+
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
@@ -126,7 +157,7 @@ class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
     filter_backends =  [DjangoFilterBackend,SearchFilter]
-    filterset_fields = ('degree',)
+    filterset_fields = ('degree','category__name')
     search_fields = ('name',)
 
 
@@ -167,3 +198,12 @@ class ProductDetail(generics.RetrieveAPIView):
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
     queryset = models.UserModel.objects.all()
+
+
+class CategoryListView(generics.ListAPIView):
+    queryset = models.Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+
+class CreatInformationView(generics.CreateAPIView):
+    queryset = models.Information.objects.all()
+    serializer_class = serializers.InformationSerializer

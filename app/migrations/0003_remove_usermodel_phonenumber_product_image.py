@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='usermodel',
-            name='phonenumber',
-        ),
         migrations.AddField(
             model_name='product',
             name='image',
