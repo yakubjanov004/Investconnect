@@ -1,5 +1,5 @@
 from django.urls import path
-from app import views 
+from app import views
 
 urlpatterns = [
     path('profile-detail/<int:pk>/', views.ProfilDetailAPIView.as_view(), name='profil'),
@@ -20,5 +20,5 @@ urlpatterns = [
 
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
-    path('Information/creat', views.CreatInformationView.as_view(), name='information-creat'),
+    path('Information/create', views.CreatInformationView.as_view(), name='information-creat'),
 ]
