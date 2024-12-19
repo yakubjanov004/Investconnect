@@ -110,27 +110,63 @@ class GetProfileAPI(APIView):
 
 
 
+#class VerifyAPIView(APIView):
+    # permission_classes = [AllowAny]
+
+    # def post(self, request, *args, **kwargs):
+    #     serializer = VerifySerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+
+    #     user = serializer.validated_data.get('user')
+    #     code = serializer.validated_data.get('code')
+
+    #     if timezone.now() > user.expire_date:
+    #         user.delete()  
+    #         raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
+
+    #     if code != user.code:
+    #         raise ValidationError({"error": "Kod noto‘g‘ri."})
+
+    #     user.status = 'approwed'
+    #     user.save()
+    #     token, _ = Token.objects.get_or_create(user=user)
+
+    #     return Response(data={"token": token.key, "user": user.id})
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        # Serializerni yaratish
         serializer = VerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(raise_exception=True)  # Validatsiyani bajarish
+        print(f"Serializer validatsiya qilingan: {serializer.validated_data}")  # Validatsiya natijasi
 
+        # Foydalanuvchi va kodni olish
         user = serializer.validated_data.get('user')
         code = serializer.validated_data.get('code')
+        print(f"Foydalanuvchi: {user}, Kod: {code}")  # Foydalanuvchi va kodni tekshirish
 
+        # Kod muddati tugaganini tekshirish
         if timezone.now() > user.expire_date:
-            user.delete()  
+            print(f"Foydalanuvchi {user.id} ning kodi muddati tugagan.")  # Kod muddati tugagan
+            user.delete()  # Foydalanuvchi o'chiriladi
             raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
 
+        # Kod noto'g'ri ekanligini tekshirish
         if code != user.code:
+            print(f"Foydalanuvchi {user.id} ning kodi noto‘g‘ri.")  # Kod noto'g'ri bo'lsa
             raise ValidationError({"error": "Kod noto‘g‘ri."})
 
+        # Foydalanuvchini tasdiqlash
         user.status = 'approwed'
-        user.save()
-        token, _ = Token.objects.get_or_create(user=user)
+        user.save()  # Foydalanuvchi statusini o'zgartirish
+        print(f"Foydalanuvchi {user.id} tasdiqlandi va saqlandi.")  # Foydalanuvchi tasdiqlangan
 
+        # Token yaratish
+        token, _ = Token.objects.get_or_create(user=user)
+        print(f"Token yaratildi: {token.key}")  # Yaratilgan token
+
+        # Javob qaytarish
         return Response(data={"token": token.key, "user": user.id})
 
 

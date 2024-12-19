@@ -33,16 +33,31 @@ class Userserializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+# class VerifySerializer(serializers.Serializer):
+#     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
+#     code = serializers.CharField()
+
+#     def validate_user(self, value):
+#         try:
+#             user = UserModel.objects.get(id=value.id)
+#         except UserModel.DoesNotExist:
+#             raise serializers.ValidationError("Foydalanuvchi topilmadi.")
+#         return user
 class VerifySerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
     code = serializers.CharField()
 
     def validate_user(self, value):
+        print(f"Validatsiya uchun kiritilgan user: {value}")  # Foydalanuvchi ma'lumotlarini tekshirish
+
         try:
             user = UserModel.objects.get(id=value.id)
+            print(f"Foydalanuvchi topildi: {user}")  # Foydalanuvchi topilsa
         except UserModel.DoesNotExist:
+            print("Foydalanuvchi topilmadi.")  # Agar foydalanuvchi topilmasa
             raise serializers.ValidationError("Foydalanuvchi topilmadi.")
         return user
+
 
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
