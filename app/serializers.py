@@ -85,6 +85,19 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name', 'degree','image','category', 'price'
         )
 
+class ProductInforationNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        fields = ('name',)
+        read_only = True
+
+class ProductinformationListSerializer(serializers.ModelSerializer):
+    product = ProductInforationNameSerializer(read_only=True)
+
+    class Meta:
+        model = models.Information
+        exclude = ('created_at',  'updated_at')
+
 
 
 class CreateProductSerializer(serializers.ModelSerializer):

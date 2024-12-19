@@ -1,5 +1,5 @@
 from django.urls import path
-from app import views
+from app import views 
 
 urlpatterns = [
     path('profile-detail/<int:pk>/', views.ProfilDetailAPIView.as_view(), name='profil'),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
 
     path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
+    path('products/information-list/', views.ProductInformationListAPIView.as_view(), name='product-list'),
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),
     path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
     path('products/<int:id>/', views.ProductDetail.as_view(), name='product-detail'),

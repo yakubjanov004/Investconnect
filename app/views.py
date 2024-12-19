@@ -160,6 +160,13 @@ class ProductListAPIView(ListAPIView):
     filterset_fields = ('degree','category__name')
     search_fields = ('name',)
 
+class ProductInformationListAPIView(ListAPIView):
+    serializer_class = serializers.ProductinformationListSerializer
+    queryset = models.Information.objects.all()
+    filter_backends =  [DjangoFilterBackend,SearchFilter]
+    filterset_fields = ('key','value')
+    search_fields = ('key',)
+
 
 class CommentListAPIView(ListAPIView):
     serializer_class = serializers.CommentSerializer
