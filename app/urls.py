@@ -14,11 +14,12 @@ urlpatterns = [
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
 
     path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
+    path('products/information-list/', views.ProductInformationListAPIView.as_view(), name='product-list'),
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),
     path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
     path('products/<int:id>/', views.ProductDetail.as_view(), name='product-detail'),
 
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
-    path('Information/creat', views.CreatInformationView.as_view(), name='information-creat'),
+    path('Information/create', views.CreatInformationView.as_view(), name='information-creat'),
 ]
