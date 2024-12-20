@@ -125,13 +125,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.UserModel
-        fields = (
-            'firstname',
-            'lastname',
-            'phone',
-            )
-        
+        model = UserModel
+        fields = ('firstname', 'lastname', 'phone')
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -142,9 +137,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 
 class ProfilDetailSerializers(serializers.ModelSerializer):
-
     class Meta:
-        model = models.UserModel
+        model = UserModel
         fields = ('firstname', 'lastname', 'phone', 'email', 'role')
 
 class CategorySerializer(serializers.ModelSerializer):

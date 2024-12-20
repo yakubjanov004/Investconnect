@@ -2,14 +2,14 @@ from django.urls import path
 from app import views 
 
 urlpatterns = [
-    path('profile-detail/<int:pk>/', views.ProfilDetailAPIView.as_view(), name='profil'),
+    path('profile-detail/', views.ProfilDetailAPIView.as_view(), name='profile-detail'),
 
-    path('users/update/<int:pk>/', views.UserUpdateAPIView.as_view(), name='user-update'),
+    path('users/update/', views.UserUpdateAPIView.as_view(), name='user-update'),
     path('users/register/', views.UserRegister.as_view(), name='user-register'),
     path('users/verify/', views.VerifyAPIView.as_view(), name='user-verify'),
     path('users/login/', views.LoginAPIView.as_view(), name='user-login'),
     path('users/get/', views.GetUserAPI.as_view(), name='get-user'),
-    path('users/profile-get/<int:user_id>/', views.GetProfileAPI.as_view(), name='get-profile-user'),
+    path('users/profile/', views.GetProfileAPI.as_view(), name='get-profile'),
 
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
 
