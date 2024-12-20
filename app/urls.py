@@ -18,7 +18,6 @@ urlpatterns = [
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),
     path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
     path('products/<int:id>/', views.ProductDetail.as_view(), name='product-detail'),
-
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
     path('Information/create', views.CreatInformationView.as_view(), name='information-creat'),

@@ -113,24 +113,24 @@ class VerifyAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = VerifySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True) 
+        serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data.get('user')
         code = serializer.validated_data.get('code')
 
         if timezone.now() > user.expire_date:
-            user.delete() 
+            user.delete()  
             raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
 
         if code != user.code:
             raise ValidationError({"error": "Kod noto‘g‘ri."})
 
-        user.status = 'approwed'  
-        user.save()  
-
+        user.status = UserModel.UserAuthStatus.APPROVED
+        user.save()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
+
 
 
 class LoginAPIView(APIView):

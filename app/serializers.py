@@ -37,11 +37,6 @@ class VerifySerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
     code = serializers.CharField()
 
-    def validate_user(self, value):
-        if not isinstance(value, UserModel):
-            raise serializers.ValidationError("Foydalanuvchi topilmadi yoki noto'g'ri formatda.")
-        return value
-
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
