@@ -48,15 +48,10 @@ class VerifySerializer(serializers.Serializer):
     code = serializers.CharField()
 
     def validate_user(self, value):
-        print(f"Validatsiya uchun kiritilgan user: {value}")  # Foydalanuvchi ma'lumotlarini tekshirish
+        if not isinstance(value, UserModel):
+            raise serializers.ValidationError("Foydalanuvchi topilmadi yoki noto'g'ri formatda.")
+        return value
 
-        try:
-            user = UserModel.objects.get(id=value.id)
-            print(f"Foydalanuvchi topildi: {user}")  # Foydalanuvchi topilsa
-        except UserModel.DoesNotExist:
-            print("Foydalanuvchi topilmadi.")  # Agar foydalanuvchi topilmasa
-            raise serializers.ValidationError("Foydalanuvchi topilmadi.")
-        return user
 
 
 class LoginSerializer(serializers.Serializer):
