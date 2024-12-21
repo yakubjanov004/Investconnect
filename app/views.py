@@ -16,6 +16,7 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 
 class UserRegister(APIView):
@@ -202,6 +203,7 @@ class ProductDetail(generics.RetrieveAPIView):
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
