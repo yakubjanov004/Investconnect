@@ -139,7 +139,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
+        fields = ('username','firstname', 'lastname', 'phone', 'email', 'role')
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
