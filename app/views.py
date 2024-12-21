@@ -16,8 +16,6 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound
-from rest_framework.authentication import TokenAuthentication
 
 
 class UserRegister(APIView):
@@ -97,18 +95,16 @@ class GetProfileAPI(APIView):
 
     def get(self, request):
         try:
-            user = request.user  # Token orqali foydalanuvchini olish
+            user = request.user  
             user_data = {
                 "id": user.id,
                 "username": user.username,
-                "phone": getattr(user, 'phone', None),  # Agar 'phone' maydoni bo'lmasa, None qaytaradi
-                "role": getattr(user, 'role', None),    # Agar 'role' maydoni bo'lmasa, None qaytaradi
+                "phone": getattr(user, 'phone', None), 
+                "role": getattr(user, 'role', None),   
             }
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
@@ -127,11 +123,12 @@ class VerifyAPIView(APIView):
         if code != user.code:
             raise ValidationError({"error": "Kod noto‘g‘ri."})
 
-        user.status = 'approwed'
+        user.status = UserModel.UserAuthStatus.APPROVED
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
+
 
 
 class LoginAPIView(APIView):
