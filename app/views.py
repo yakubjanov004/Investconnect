@@ -16,6 +16,8 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
+from rest_framework.authentication import TokenAuthentication
 
 
 class UserRegister(APIView):
@@ -93,18 +95,16 @@ class GetUserAPI(APIView):
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, user_id):
+    def get(self, request):
         try:
-            user = UserModel.objects.get(id=user_id)  
+            user = request.user  # Token orqali foydalanuvchini olish
             user_data = {
                 "id": user.id,
-                "username": user.username,               
-                "phone": user.phone,
-                "role": user.role,
+                "username": user.username,
+                "phone": getattr(user, 'phone', None),  # Agar 'phone' maydoni bo'lmasa, None qaytaradi
+                "role": getattr(user, 'role', None),    # Agar 'role' maydoni bo'lmasa, None qaytaradi
             }
             return Response(user_data, status=status.HTTP_200_OK)
-        except UserModel.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,7 +191,7 @@ class RegistrCreateAPIView(CreateAPIView):
 
 class UserUpdateAPIView(UpdateAPIView):
     serializer_class = serializers.UserUpdateSerializer
-    queryset = models.UserModel.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
@@ -204,8 +204,10 @@ class ProductDetail(generics.RetrieveAPIView):
 
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
-    queryset = models.UserModel.objects.all()
+    permission_classes = [IsAuthenticated]
 
+    def get_object(self):
+        return get_object_or_404(models.UserModel, id=self.request.user.id)
 
 class CategoryListView(generics.ListAPIView):
     queryset = models.Category.objects.all()
