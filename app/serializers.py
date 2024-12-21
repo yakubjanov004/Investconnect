@@ -48,10 +48,9 @@ class LoginSerializer(serializers.Serializer):
         if not phone or not password:
             raise ValidationError({"error": "Telefon raqam va parolni kiriting."})
 
-        if phone and password:
-            user = authenticate(request=self.context.get('request'), username=phone, password=password)
-            if not user:
-                raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
+        user = authenticate(request=self.context.get('request'), username=phone, password=password)
+        if not user:
+            raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
 
         data['user'] = user
         return data

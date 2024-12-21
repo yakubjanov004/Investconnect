@@ -134,11 +134,11 @@ class VerifyAPIView(APIView):
 
 class LoginAPIView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            username = serializer.validated_data['username']
+            phone = serializer.validated_data['phone']
             password = serializer.validated_data['password']
-            user = authenticate(username=username, password=password)
+            user = authenticate(request=request, username=phone, password=password)
             
             if user:
                 token, created = Token.objects.get_or_create(user=user)
@@ -146,6 +146,7 @@ class LoginAPIView(APIView):
             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 class UserModelListAPIView(ListAPIView):
     serializer_class = serializers.UserModelSerializer
