@@ -16,7 +16,6 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 
 
 class UserRegister(APIView):
@@ -94,18 +93,22 @@ class GetUserAPI(APIView):
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, user_id):
         try:
-            user = request.user  
+            user = UserModel.objects.get(id=user_id)  
             user_data = {
                 "id": user.id,
-                "username": user.username,
-                "phone": getattr(user, 'phone', None), 
-                "role": getattr(user, 'role', None),   
+                "username": user.username,               
+                "phone": user.phone,
+                "role": user.role,
             }
             return Response(user_data, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
@@ -124,12 +127,11 @@ class VerifyAPIView(APIView):
         if code != user.code:
             raise ValidationError({"error": "Kod noto‘g‘ri."})
 
-        user.status = UserModel.UserAuthStatus.APPROVED
+        user.status = 'approwed'
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
-
 
 
 class LoginAPIView(APIView):
@@ -189,7 +191,7 @@ class RegistrCreateAPIView(CreateAPIView):
 
 class UserUpdateAPIView(UpdateAPIView):
     serializer_class = serializers.UserUpdateSerializer
-    permission_classes = [IsAuthenticated]
+    queryset = models.UserModel.objects.all()
 
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
@@ -202,11 +204,7 @@ class ProductDetail(generics.RetrieveAPIView):
 
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-
-    def get_object(self):
-        return get_object_or_404(models.UserModel, id=self.request.user.id)
+    queryset = models.UserModel.objects.all()
 
 
 class CategoryListView(generics.ListAPIView):
