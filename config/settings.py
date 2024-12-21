@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
+    'userapp', 
     'rest_framework_swagger',
     'corsheaders',
     'rest_framework',
@@ -106,4 +107,4 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'app.UserModel'
+AUTH_USER_MODEL = 'userapp.UserModel'
