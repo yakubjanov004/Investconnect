@@ -40,11 +40,17 @@ class Product(BaseModel):
         return self.name
 
 
-class Information(BaseModel):
+class PrivateInformation(BaseModel):
+    class DegreeChoicess(models.TextChoices):
+        AKTIV = 'aktiv', 'Aktiv'
+        DEAKTIV = 'deaktiv', 'Deaktiv'
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    key = models.CharField(max_length=50)
-    value = models.CharField(max_length=50)
-
+    status = models.CharField(max_length=30, choices=DegreeChoicess.choices, default=DegreeChoicess.AKTIV)
+    kampanya_egasi = models.CharField(max_length=50)
+    kontact = models.CharField(max_length=50)
+    campany_name = models.CharField(max_length=50)
+    oylik_daromadi = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) 
+    soff_foydasi = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     def __str__(self):
         return f"{self.product.name} | {self.key}: {self.value}"
 

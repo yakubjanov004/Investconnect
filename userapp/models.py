@@ -52,6 +52,7 @@ class UserModel(AbstractUser):
     lastname = models.CharField(max_length=50)
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
+    # image = models.ImageField(upload_to="user_profile/",null=True, blank=True)
     username = models.CharField(
         _("username"),
         max_length=30,
@@ -61,6 +62,7 @@ class UserModel(AbstractUser):
             "unique": _("Bu username ga ega foydalanuvchi allaqachon mavjud."),
         },
     )
+
     phone = models.CharField(
         _("phone"),
         max_length=13,  
@@ -98,3 +100,5 @@ class UserModel(AbstractUser):
 
     def __str__(self):
         return f"{self.id}- {self.username} - {self.firstname} - {self.lastname}"
+
+

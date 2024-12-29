@@ -90,11 +90,11 @@ class ProductInforationNameSerializer(serializers.ModelSerializer):
         fields = ('name',)
         read_only = True
 
-class ProductinformationListSerializer(serializers.ModelSerializer):
+class ProductinformationSerializer(serializers.ModelSerializer):
     product = ProductInforationNameSerializer(read_only=True)
 
     class Meta:
-        model = models.Information
+        model = models.PrivateInformation
         exclude = ('created_at',  'updated_at')
 
 
@@ -125,7 +125,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('firstname', 'lastname', 'phone')
+        fields = ('firstname', 'lastname', 'phone',)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -147,5 +147,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class InformationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Information
-        fields = ['id', 'product', 'key', 'value']
+        model = models.PrivateInformation
+        exclude = ('created_at',  'updated_at')
+
+
+class UserProductSerializer(serializers.ModelSerializer):
+    category = GetCategorySerializer(read_only=True)
+
+    class Meta:
+        model = models.Product
+        fields = (
+            'id', 'name', 'degree','image','category', 'price'
+        )

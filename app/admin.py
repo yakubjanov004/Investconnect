@@ -27,8 +27,8 @@ class ContractAdmin(admin.ModelAdmin):
     user_username.short_description = "Foydalanuvchi Username"
 
 class InformationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product_name', 'key', 'value')  
-    search_fields = ('product__name', 'key', 'value')     
+    list_display = ('id', 'product_name',)  
+    search_fields = ('product__name',)     
     list_filter = ('product__name',)                      
     ordering = ('id',)                                    
 
@@ -64,4 +64,4 @@ admin.site.register(models.Contract, ContractAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Comment, CommentAdmin)
 admin.site.register(models.Product, ProductAdmin)
-admin.site.register(models.Information, InformationAdmin)
+admin.site.register(models.PrivateInformation, InformationAdmin)
