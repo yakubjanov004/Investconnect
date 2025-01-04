@@ -16,6 +16,8 @@ from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
+import requests
+from django.core.files.base import ContentFile
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -70,28 +72,44 @@ class CodeAPI(APIView):
                 "detail": "Verifikatsiya kodi topilmadi."
             }, status=status.HTTP_404_NOT_FOUND)
         
+
 class GetUserAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def post(self, request):
+        user_id = request.data.get("id")
+        profile_image_url = request.data.get("profile_image")  
+        profile_image_file = request.FILES.get("profile_image") 
+
         try:
-            users = UserModel.objects.all()
-            user_data = [
-                {
-                    "id": user.id,
-                    "firstname": user.firstname,
-                    "lastname": user.lastname,
-                    "profile_image": user.profile_image.url if user.profile_image and hasattr(user.profile_image, 'url') else None,  
-                    "phone": user.phone,
-                    "email": user.email,
-                    "role": user.role,
-                }
-                for user in users
-            ]
-            return Response(user_data, status=status.HTTP_200_OK)
+            user = UserModel.objects.get(id=user_id)
+
+            if profile_image_file and profile_image_url:
+                user.profile_image.save(profile_image_file.name, profile_image_file, save=True)
+            elif profile_image_file:
+                user.profile_image.save(profile_image_file.name, profile_image_file, save=True)
+            elif profile_image_url:
+                response = requests.get(profile_image_url)
+                if response.status_code == 200:
+                    file_name = profile_image_url.split("/")[-1]
+                    user.profile_image.save(file_name, ContentFile(response.content), save=True)
+                else:
+                    return Response(
+                        {"error": "Rasmni yuklab bo'lmadi, URL noto'g'ri."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                return Response(
+                    {"error": "Profil rasmi uchun hech qanday ma'lumot yuborilmadi."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            return Response({"message": "Profil rasmi muvaffaqiyatli saqlandi!"}, status=status.HTTP_200_OK)
+
+        except UserModel.DoesNotExist:
+            return Response({"error": "Foydalanuvchi topilmadi."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
         
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
