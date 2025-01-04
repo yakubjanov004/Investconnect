@@ -4,6 +4,10 @@ from .models import UserModel
 from app import models
 from rest_framework.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.core.files.base import ContentFile
+import requests
+import os
+
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -141,14 +145,24 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         fields = ('username', 'firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
 
     def validate_profile_image(self, value):
-        if value and not value.name.endswith(('.jpg', '.png', '.jpeg')):
+        if isinstance(value, str) and value.startswith('http'):  
+            response = requests.get(value)
+            if response.status_code != 200:
+                raise serializers.ValidationError("The URL is not accessible.")
+        elif value and not value.name.endswith(('.jpg', '.png', '.jpeg')):
             raise serializers.ValidationError("Only image files (jpg, png, jpeg) are allowed.")
         return value
 
     def update(self, instance, validated_data):
         profile_image = validated_data.pop('profile_image', None)
         if profile_image:
-            instance.profile_image = profile_image
+            if isinstance(profile_image, str) and profile_image.startswith('http'):  
+                response = requests.get(profile_image)
+                if response.status_code == 200:
+                    file_name = os.path.basename(profile_image)
+                    instance.profile_image.save(file_name, ContentFile(response.content), save=False)
+            else:
+                instance.profile_image = profile_image
         instance = super().update(instance, validated_data)
         instance.save()
         return instance
