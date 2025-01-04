@@ -52,7 +52,7 @@ class UserModel(AbstractUser):
     lastname = models.CharField(max_length=50)
     email = models.EmailField()
     role = models.CharField(max_length=30, choices=RoleChoicess.choices)
-    # image = models.ImageField(upload_to="user_profile/",null=True, blank=True)
+    profile_image = models.ImageField(upload_to="user_profile/",null=True, blank=True)
     username = models.CharField(
         _("username"),
         max_length=30,
