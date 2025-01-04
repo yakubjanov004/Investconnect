@@ -138,7 +138,14 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('username','firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
+        fields = ('username', 'firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
+
+    def update(self, instance, validated_data):
+        profile_image = validated_data.pop('profile_image', None)
+        if profile_image:
+            instance.profile_image = profile_image
+        return super().update(instance, validated_data)
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
