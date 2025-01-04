@@ -81,7 +81,7 @@ class GetUserAPI(APIView):
                     "id": user.id,
                     "firstname": user.firstname,
                     "lastname": user.lastname,
-                    "profile_image": user.profile_image.url if user.profile_image else None,  
+                    "profile_image": user.profile_image.url if user.profile_image and hasattr(user.profile_image, 'url') else None,  
                     "phone": user.phone,
                     "email": user.email,
                     "role": user.role,
