@@ -78,14 +78,17 @@ class GetUserAPI(APIView):
 
     def get(self, request):
         try:
+            # Barcha foydalanuvchilarni olish
             users = UserModel.objects.all()
             user_data = []
-            for user in users:
-                if user.profile_image and hasattr(user.profile_image, 'url'):
-                    profile_image_url = user.profile_image.url
-                else:
-                    profile_image_url = None  
 
+            for user in users:
+                # Profil rasmi mavjudligini tekshirish
+                profile_image_url = (
+                    user.profile_image.url if user.profile_image and hasattr(user.profile_image, 'url') else None
+                )
+
+                # Har bir foydalanuvchining ma'lumotlarini yig'ish
                 user_data.append({
                     "id": user.id,
                     "firstname": user.firstname,
@@ -96,9 +99,11 @@ class GetUserAPI(APIView):
                     "role": user.role,
                 })
 
+            # Muvaffaqiyatli javob qaytarish
             return Response(user_data, status=status.HTTP_200_OK)
 
         except Exception as e:
+            # Xatolik yuz bersa, javob qaytarish
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class GetProfileAPI(APIView):
