@@ -74,37 +74,30 @@ class CodeAPI(APIView):
         
 
 class GetUserAPI(APIView):
-    permission_classes = [IsAuthenticated]
+  permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            # Barcha foydalanuvchilarni olish
-            users = UserModel.objects.all()
-            user_data = []
+  def get(self, request):
+    try:
+      users = UserModel.objects.all()
+      user_data = []
 
-            for user in users:
-                # Profil rasmi mavjudligini tekshirish
-                profile_image_url = (
-                    user.profile_image.url if user.profile_image and hasattr(user.profile_image, 'url') else None
-                )
+      for user in users:
+        profile_image_url = user.profile_image.url if user.profile_image else None
 
-                # Har bir foydalanuvchining ma'lumotlarini yig'ish
-                user_data.append({
-                    "id": user.id,
-                    "firstname": user.firstname,
-                    "lastname": user.lastname,
-                    "profile_image": profile_image_url,
-                    "phone": user.phone,
-                    "email": user.email,
-                    "role": user.role,
-                })
+        user_data.append({
+          "id": user.id,
+          "firstname": user.firstname,
+          "lastname": user.lastname,
+          "profile_image": profile_image_url,
+          "phone": user.phone,
+          "email": user.email,
+          "role": user.role,
+        })
 
-            # Muvaffaqiyatli javob qaytarish
-            return Response(user_data, status=status.HTTP_200_OK)
+      return Response(user_data, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            # Xatolik yuz bersa, javob qaytarish
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+      return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
