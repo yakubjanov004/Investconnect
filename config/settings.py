@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-i6qrn^c6)n^op^11(12*s)#fompwure2bye36w(b6^!uashv*v
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bakirali007.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -105,6 +105,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 STATIC_URL = "static/"

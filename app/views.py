@@ -76,45 +76,28 @@ class CodeAPI(APIView):
 class GetUserAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        user_id = request.data.get("id")
-        profile_image_url = request.data.get("profile_image")  # URL sifatida yuborilgan rasm
-        profile_image_file = request.FILES.get("profile_image")  # Fayl sifatida yuborilgan rasm
-
+    def get(self, request):
         try:
-            # Foydalanuvchini topish
-            user = UserModel.objects.get(id=user_id)
-
-            if profile_image_file and profile_image_url:
-                # Har ikkisi mavjud bo'lsa, fayl ustun turadi
-                user.profile_image.save(profile_image_file.name, profile_image_file, save=True)
-            elif profile_image_file:
-                # Faqat fayl mavjud bo'lsa
-                user.profile_image.save(profile_image_file.name, profile_image_file, save=True)
-            elif profile_image_url:
-                # Faqat URL mavjud bo'lsa
-                response = requests.get(profile_image_url)
-                if response.status_code == 200:
-                    # Fayl nomini yaratish
-                    file_name = profile_image_url.split("/")[-1]
-                    # Yuklangan rasmni ContentFile obyekti sifatida saqlash
-                    user.profile_image.save(file_name, ContentFile(response.content), save=True)
+            users = UserModel.objects.all()
+            user_data = []
+            for user in users:
+                if user.profile_image and hasattr(user.profile_image, 'url'):
+                    profile_image_url = user.profile_image.url
                 else:
-                    return Response(
-                        {"error": "Rasmni yuklab bo'lmadi, URL noto'g'ri."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-            else:
-                # Hech narsa yuborilmagan bo'lsa
-                return Response(
-                    {"error": "Profil rasmi uchun hech qanday ma'lumot yuborilmadi."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                    profile_image_url = None  
 
-            return Response({"message": "Profil rasmi muvaffaqiyatli saqlandi!"}, status=status.HTTP_200_OK)
+                user_data.append({
+                    "id": user.id,
+                    "firstname": user.firstname,
+                    "lastname": user.lastname,
+                    "profile_image": profile_image_url,
+                    "phone": user.phone,
+                    "email": user.email,
+                    "role": user.role,
+                })
 
-        except UserModel.DoesNotExist:
-            return Response({"error": "Foydalanuvchi topilmadi."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(user_data, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
