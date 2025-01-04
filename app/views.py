@@ -75,13 +75,13 @@ class GetUserAPI(APIView):
 
     def get(self, request):
         try:
-            users = UserModel.objects.all() 
+            users = UserModel.objects.all()
             user_data = [
                 {
-                    "id": user.id,  
+                    "id": user.id,
                     "firstname": user.firstname,
                     "lastname": user.lastname,
-                    "profile_image": user.profile_image,
+                    "profile_image": user.profile_image.url if user.profile_image else None,  
                     "phone": user.phone,
                     "email": user.email,
                     "role": user.role,
@@ -91,6 +91,7 @@ class GetUserAPI(APIView):
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
