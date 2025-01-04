@@ -81,6 +81,7 @@ class GetUserAPI(APIView):
                     "id": user.id,  
                     "firstname": user.firstname,
                     "lastname": user.lastname,
+                    "profile_image": user.profile_image,
                     "phone": user.phone,
                     "email": user.email,
                     "role": user.role,
