@@ -140,11 +140,19 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         model = UserModel
         fields = ('username', 'firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
 
+    def validate_profile_image(self, value):
+        if value and not value.name.endswith(('.jpg', '.png', '.jpeg')):
+            raise serializers.ValidationError("Only image files (jpg, png, jpeg) are allowed.")
+        return value
+
     def update(self, instance, validated_data):
         profile_image = validated_data.pop('profile_image', None)
         if profile_image:
             instance.profile_image = profile_image
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+        instance.save()
+        return instance
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
