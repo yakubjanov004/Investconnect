@@ -8,6 +8,7 @@ urlpatterns = [
     path('users/update/', views.UserUpdateAPIView.as_view(), name='user-update'),
     path('users/register/', views.UserRegister.as_view(), name='user-register'),
     path('users/verify/', views.VerifyAPIView.as_view(), name='user-verify'),
+    path('users/resend-code/', views.ResendCodeAPIView.as_view(), name='resend-code'),
     path('users/login/', views.LoginAPIView.as_view(), name='user-login'),
     path('users/get/', views.GetUserAPI.as_view(), name='get-user'),
     path('users/profile/', views.GetProfileAPI.as_view(), name='get-profile'),

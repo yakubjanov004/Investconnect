@@ -135,6 +135,30 @@ class VerifyAPIView(APIView):
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response(data={"token": token.key, "user": user.id})
+    
+class ResendCodeAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        phone = request.data.get('phone')  
+        if not phone:
+            raise ValidationError({"error": "Telefon raqamni kiriting."})
+        
+        try:
+            user = UserModel.objects.get(phone=phone, status=UserModel.UserAuthStatus.NEW)
+        except UserModel.DoesNotExist:
+            raise ValidationError({"error": "Telefon raqam topilmadi yoki foydalanuvchi allaqachon tasdiqlangan."})
+    
+
+        if user.expire_date is None or user.expire_date < timezone.now():
+            print("asa")
+            user.generate_verification_code()
+            user.save()
+
+        return Response(
+            {"code": user.code}, 
+            status=status.HTTP_200_OK
+        )
 
 
 
