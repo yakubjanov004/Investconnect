@@ -16,8 +16,6 @@ from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
-import requests
-from django.core.files.base import ContentFile
 from rest_framework.permissions import IsAuthenticated
 
 
