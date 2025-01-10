@@ -102,16 +102,18 @@ class GetProfileAPI(APIView):
 
     def get(self, request):
         try:
-            user = request.user  
+            user = request.user
             user_data = {
                 "id": user.id,
                 "username": user.username,
-                "phone": getattr(user, 'phone', None), 
-                "role": getattr(user, 'role', None),   
+                "profile_image": user.profile_image.url if user.profile_image else None,
+                "phone": getattr(user, 'phone', None),
+                "role": getattr(user, 'role', None),
             }
             return Response(user_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
