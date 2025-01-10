@@ -16,6 +16,8 @@ from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
+import requests
+from django.core.files.base import ContentFile
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -70,26 +72,32 @@ class CodeAPI(APIView):
                 "detail": "Verifikatsiya kodi topilmadi."
             }, status=status.HTTP_404_NOT_FOUND)
         
-class GetUserAPI(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            users = UserModel.objects.all() 
-            user_data = [
-                {
-                    "id": user.id,  
-                    "firstname": user.firstname,
-                    "lastname": user.lastname,
-                    "phone": user.phone,
-                    "email": user.email,
-                    "role": user.role,
-                }
-                for user in users
-            ]
-            return Response(user_data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+class GetUserAPI(APIView):
+  permission_classes = [IsAuthenticated]
+
+  def get(self, request):
+    try:
+      users = UserModel.objects.all()
+      user_data = []
+
+      for user in users:
+        profile_image_url = user.profile_image.url if user.profile_image else None
+
+        user_data.append({
+          "id": user.id,
+          "firstname": user.firstname,
+          "lastname": user.lastname,
+          "profile_image": profile_image_url,
+          "phone": user.phone,
+          "email": user.email,
+          "role": user.role,
+        })
+
+      return Response(user_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+      return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
