@@ -101,13 +101,30 @@ class ProductinformationSerializer(serializers.ModelSerializer):
         model = models.PrivateInformation
         exclude = ('created_at',  'updated_at')
 
+class PrivateInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PrivateInformation
+        fields = ('kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
+    private_information = PrivateInformationSerializer()
+
     class Meta:
         model = models.Product
-        fields = ('user','name', 'rendement','location', 'image', 'description', 'category', 'contract', 'price')
+        fields = (
+            'user', 'name', 'rendement', 'location', 'image',
+            'description', 'category', 'contract', 'price',
+            'file', 'private_information'
+        )
 
+    def create(self, validated_data):
+        private_information_data = validated_data.pop('private_information', None)
+        product = models.Product.objects.create(**validated_data)
+        if private_information_data:
+            private_info = models.PrivateInformation.objects.create(product=product, **private_information_data)
+            product.private_information = private_info
+        return product
 
 
 class CommentSerializer(serializers.ModelSerializer):
