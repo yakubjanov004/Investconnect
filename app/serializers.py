@@ -115,7 +115,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
         fields = (
             'user', 'name', 'rendement', 'location', 'image',
             'description', 'category', 'contract', 'price',
-            'file', 'private_information'
+            'private_information'
         )
 
     def create(self, validated_data):
