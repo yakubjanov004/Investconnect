@@ -185,7 +185,7 @@ class UserModelListAPIView(ListAPIView):
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
-    filter_backends =  [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ('category__name',)
     search_fields = ('name',)
 
@@ -212,6 +212,24 @@ class CommentListAPIView(ListAPIView):
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = models.Product.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        product_images = request.FILES.getlist('product_images') 
+        data = request.data.copy() 
+        data['product_images'] = product_images  
+
+        if len(product_images) > 8:
+            raise ValidationError({"error": "Siz bir vaqtning o'zida 8 tadan ortiq rasm yuborishingiz mumkin emas."})
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        product = serializer.save()
+
+        for image in product_images:
+            ProductImage.objects.create(product=product, image=image)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
