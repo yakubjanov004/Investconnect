@@ -13,6 +13,8 @@
 media/
 static/
 venv/
+stash/
+
 *.log
 *.sqlite3
 *.env
