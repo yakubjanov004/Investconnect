@@ -17,14 +17,18 @@ urlpatterns = [
     path('verification-code/<int:user_id>/', views.CodeAPI.as_view(), name='get_verification_code'),
 
     path('products/list/', views.ProductListAPIView.as_view(), name='product-list'),
-    path('products/information-detail/', views.ProductInformationAPIView.as_view(), name='product_information-detail'),
+    path('products/information-detail/<int:product_id>', views.PrivateProductDetailsView.as_view(), name='product_information-detail'),
     path('products/create/', views.ProductCreateAPIView.as_view(), name='product-create'),
     path('products/comment-list/', views.CommentListAPIView.as_view(), name='product-comment-list'),
-    path('products/<int:id>/', views.ProductDetail.as_view(), name='product-detail'),
+    path('products/<int:id>/', views.PublicProductsView.as_view(), name='product-detail'),
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
     path('private/information/create', views.CreatInformationView.as_view(), name='private_information-creat'),
 
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('payment-and-check/', views.PaymentAndCheckView.as_view(), name='payment-and-check'),
+
+    path('investor-products/', views.UserPurchasedProductsView.as_view(), name='investor-products'),
 ]

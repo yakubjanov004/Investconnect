@@ -277,3 +277,109 @@ class UserProductListView(APIView):
         user_products = models.Product.objects.filter(user=request.user)
         serializer = serializers.UserProductSerializer(user_products, many=True)
         return Response(serializer.data)
+    
+class PublicProductsView(APIView):
+    def get(self, request, *args, **kwargs):
+        products = models.Product.objects.all()  # Faol bo'lmagan mahsulotlar ko'rinadi
+        data = [
+            {
+                "name": product.name,
+                "description": product.description,
+                "location": product.location,
+                "image": product.image.url if product.image else None,
+                "price": product.price,
+                "category": product.category.name if product.category else None,
+            }
+            for product in products
+        ]
+        return Response({"products": data})
+
+
+
+class PrivateProductDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, product_id, *args, **kwargs):
+        # To'lov qilinganligini tekshirish
+        payment = models.Payment.objects.filter(
+            investor=request.user,
+            product_id=product_id,
+            is_active=True
+        ).exists()
+
+        if not payment:
+            return Response({"error": "To'lov qilinmagan"}, status=403)
+
+        try:
+            private_info = models.PrivateInformation.objects.get(product_id=product_id)
+        except models.PrivateInformation.DoesNotExist:
+            return Response({"error": "Maxsus ma'lumot topilmadi"}, status=404)
+
+        data = {
+            "status": private_info.status,
+            "kampanya_egasi": private_info.kampanya_egasi,
+            "kontact": private_info.kontact,
+            "campany_name": private_info.campany_name,
+            "oylik_daromadi": private_info.oylik_daromadi,
+            "soff_foydasi": private_info.soff_foydasi,
+        }
+        return Response({"private_info": data})
+
+
+
+
+
+
+
+class PaymentAndCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        product_id = request.data.get('product_id')
+        amount = request.data.get('amount')
+
+        if amount != 10:
+            return Response({"error": "To'lov miqdori 10$ bo'lishi kerak"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = models.Product.objects.get(id=product_id)
+        except models.Product.DoesNotExist:
+            return Response({"error": "Mahsulot topilmadi"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Foydalanuvchi to'lovni tekshiradi
+        payment = models.Payment.objects.filter(investor=request.user, product=product, is_active=True).first()
+
+        if payment:
+            try:
+                private_info = models.PrivateInformation.objects.get(product=product)
+            except models.PrivateInformation.DoesNotExist:
+                return Response({"error": "Maxsus ma'lumot topilmadi"}, status=status.HTTP_404_NOT_FOUND)
+
+            data = {
+                "status": private_info.status,
+                "kampanya_egasi": private_info.kampanya_egasi,
+                "kontact": private_info.kontact,
+                "campany_name": private_info.campany_name,
+                "oylik_daromadi": private_info.oylik_daromadi,
+                "soff_foydasi": private_info.soff_foydasi,
+            }
+            return Response({"private_info": data, "message": "To'lov mavjud"})
+
+        else:
+            payment = models.Payment.objects.create(
+                investor=request.user,
+                product=product,
+                amount=amount,
+                is_active=True
+            )
+            return Response({"message": "To'lov muvaffaqiyatli amalga oshirildi", "payment_id": payment.id})
+
+class UserPurchasedProductsView(ListAPIView):
+    serializer_class = serializers.ProductSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return models.Product.objects.filter(
+            payment__investor=self.request.user,  # Foydalanuvchi to'lovlari
+            payment__is_active=True  # Faqat faol to'lovlar
+        ).distinct()
