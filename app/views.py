@@ -16,6 +16,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 
 
 class UserRegister(APIView):
@@ -279,10 +280,10 @@ class UserProductListView(APIView):
         return Response(serializer.data)
     
 class PublicProductsView(APIView):
-    def get(self, request, *args, **kwargs):
-        products = models.Product.objects.all()  # Faol bo'lmagan mahsulotlar ko'rinadi
-        data = [
-            {
+    def get(self, request, id, *args, **kwargs):
+        try:
+            product = models.Product.objects.get(id=id)
+            data = {
                 "name": product.name,
                 "description": product.description,
                 "location": product.location,
@@ -290,9 +291,10 @@ class PublicProductsView(APIView):
                 "price": product.price,
                 "category": product.category.name if product.category else None,
             }
-            for product in products
-        ]
-        return Response({"products": data})
+            return Response({"product": data})
+        
+        except models.Product.DoesNotExist:
+            raise NotFound(detail="Product not found")
 
 
 
@@ -300,7 +302,6 @@ class PrivateProductDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, product_id, *args, **kwargs):
-        # To'lov qilinganligini tekshirish
         payment = models.Payment.objects.filter(
             investor=request.user,
             product_id=product_id,
