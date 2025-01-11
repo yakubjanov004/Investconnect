@@ -61,11 +61,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-class ContractNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Contract
-        fields = ('contract',)
-        read_only = True
+
 
 
 
@@ -85,7 +81,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree','image','category', 'price'
+            'id', 'name','image','category', 'price'
         )
 
 class ProductInforationNameSerializer(serializers.ModelSerializer):
@@ -114,7 +110,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
         model = models.Product
         fields = (
             'user', 'name', 'rendement', 'location', 'image',
-            'description', 'category', 'contract', 'price',
+            'description', 'category','price',
             'private_information'
         )
 
@@ -134,12 +130,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = models.Comment
         fields = ('id', 'description', 'user', 'product')
 
-
-
-class RegisterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.UserModel
-        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
 
 
 
@@ -184,7 +174,7 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
+CreateProductSerializer
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

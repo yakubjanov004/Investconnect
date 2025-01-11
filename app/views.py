@@ -13,9 +13,8 @@ from rest_framework.filters import SearchFilter
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -189,7 +188,7 @@ class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
     filter_backends =  [DjangoFilterBackend,SearchFilter]
-    filterset_fields = ('degree','category__name')
+    filterset_fields = ('category__name',)
     search_fields = ('name',)
 
 class ProductInformationAPIView(generics.RetrieveAPIView):
@@ -213,11 +212,6 @@ class CommentListAPIView(ListAPIView):
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = models.Product.objects.all()
-
-
-class RegistrCreateAPIView(CreateAPIView):
-    serializer_class = serializers.RegisterSerializer
-    queryset = models.UserModel.objects.all()
 
 
 class UserUpdateAPIView(UpdateAPIView):

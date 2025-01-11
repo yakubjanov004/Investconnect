@@ -8,23 +8,11 @@ class UserModelAdmin(admin.ModelAdmin):
     ordering = ('id',)  
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'degree', 'location', 'price', 'category')  
+    list_display = ('id', 'name', 'location', 'price', 'category')  
     search_fields = ('name', 'user__username', 'category__name')  
-    list_filter = ('degree', 'category')  
+    list_filter = ('category',)  
     ordering = ('id',)  
 
-class ContractAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user_id_display', 'user_username', 'contract')  
-    search_fields = ('user__username', 'user__id')  
-    ordering = ('id',) 
-
-    def user_id_display(self, obj):
-        return obj.user.id
-    user_id_display.short_description = "Foydalanuvchi ID"
-
-    def user_username(self, obj):
-        return obj.user.username
-    user_username.short_description = "Foydalanuvchi Username"
 
 class InformationAdmin(admin.ModelAdmin):
     list_display = ('id', 'product_name',)  
@@ -60,7 +48,6 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.UserModel, UserModelAdmin)
-admin.site.register(models.Contract, ContractAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Comment, CommentAdmin)
 admin.site.register(models.Product, ProductAdmin)
