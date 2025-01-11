@@ -79,7 +79,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'category', 'price', 'images'
+            'id', 'name', 'category', 'price', 'image', 'images'
         )
 
     def get_images(self, obj):
