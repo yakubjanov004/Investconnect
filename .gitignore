@@ -12,7 +12,7 @@
 
 media/
 static/
-
+venv/
 *.log
 *.sqlite3
 *.env
