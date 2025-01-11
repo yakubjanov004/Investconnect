@@ -23,7 +23,6 @@ urlpatterns = [
     path('products/<int:id>/', views.PublicProductsView.as_view(), name='product-detail'),
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
-    path('private/information/create', views.CreatInformationView.as_view(), name='private_information-creat'),
 
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
