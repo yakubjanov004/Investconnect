@@ -4,6 +4,10 @@ from .models import UserModel
 from app import models
 from rest_framework.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.core.files.base import ContentFile
+import requests
+import os
+
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,21 +52,16 @@ class LoginSerializer(serializers.Serializer):
         if not phone or not password:
             raise ValidationError({"error": "Telefon raqam va parolni kiriting."})
 
-        if phone and password:
-            user = authenticate(request=self.context.get('request'), username=phone, password=password)
-            if not user:
-                raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
+        user = authenticate(request=self.context.get('request'), username=phone, password=password)
+        if not user:
+            raise ValidationError({"error": "Notog'ri telefon raqam yoki parol."})
 
         data['user'] = user
         return data
 
 
 
-class ContractNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Contract
-        fields = ('contract',)
-        read_only = True
+
 
 
 
@@ -82,7 +81,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'degree','image','category', 'price'
+            'id', 'name','image','category', 'price'
         )
 
 class ProductInforationNameSerializer(serializers.ModelSerializer):
@@ -91,20 +90,37 @@ class ProductInforationNameSerializer(serializers.ModelSerializer):
         fields = ('name',)
         read_only = True
 
-class ProductinformationListSerializer(serializers.ModelSerializer):
+class ProductinformationSerializer(serializers.ModelSerializer):
     product = ProductInforationNameSerializer(read_only=True)
 
     class Meta:
-        model = models.Information
+        model = models.PrivateInformation
         exclude = ('created_at',  'updated_at')
 
+class PrivateInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PrivateInformation
+        fields = ('kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
+    private_information = PrivateInformationSerializer()
+
     class Meta:
         model = models.Product
-        fields = ('user','name', 'rendement','location', 'image', 'description', 'category', 'contract', 'price')
+        fields = (
+            'user', 'name', 'rendement', 'location', 'image',
+            'description', 'category','price',
+            'private_information'
+        )
 
+    def create(self, validated_data):
+        private_information_data = validated_data.pop('private_information', None)
+        product = models.Product.objects.create(**validated_data)
+        if private_information_data:
+            private_info = models.PrivateInformation.objects.create(product=product, **private_information_data)
+            product.private_information = private_info
+        return product
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -116,22 +132,11 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.UserModel
-        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
-
-
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.UserModel
-        fields = (
-            'firstname',
-            'lastname',
-            'phone',
-            )
-        
+        model = UserModel
+        fields = ('firstname', 'lastname', 'phone',)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -142,10 +147,34 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 
 class ProfilDetailSerializers(serializers.ModelSerializer):
-
     class Meta:
-        model = models.UserModel
-        fields = ('firstname', 'lastname', 'phone', 'email', 'role')
+        model = UserModel
+        fields = ('username', 'firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
+
+    def validate_profile_image(self, value):
+        if isinstance(value, str) and value.startswith('http'):  
+            response = requests.get(value)
+            if response.status_code != 200:
+                raise serializers.ValidationError("The URL is not accessible.")
+        elif value and not value.name.endswith(('.jpg', '.png', '.jpeg')):
+            raise serializers.ValidationError("Only image files (jpg, png, jpeg) are allowed.")
+        return value
+
+    def update(self, instance, validated_data):
+        profile_image = validated_data.pop('profile_image', None)
+        if profile_image:
+            if isinstance(profile_image, str) and profile_image.startswith('http'):  
+                response = requests.get(profile_image)
+                if response.status_code == 200:
+                    file_name = os.path.basename(profile_image)
+                    instance.profile_image.save(file_name, ContentFile(response.content), save=False)
+            else:
+                instance.profile_image = profile_image
+        instance = super().update(instance, validated_data)
+        instance.save()
+        return instance
+
+CreateProductSerializer
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -154,5 +183,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class InformationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Information
-        fields = ['id', 'product', 'key', 'value']
+        model = models.PrivateInformation
+        exclude = ('created_at',  'updated_at')
+
+
+class UserProductSerializer(serializers.ModelSerializer):
+    category = GetCategorySerializer(read_only=True)
+
+    class Meta:
+        model = models.Product
+        fields = (
+            'id', 'name', 'degree','image','category', 'price'
+        )

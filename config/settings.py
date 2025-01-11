@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-i6qrn^c6)n^op^11(12*s)#fompwure2bye36w(b6^!uashv*v
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bakirali007.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
+    'userapp', 
     'rest_framework_swagger',
     'corsheaders',
     'rest_framework',
@@ -40,7 +41,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
-    'https://bakirali007.pythonanywhere.com/',   
+    'http://localhost:5173',
+    'https://bakirali007.pythonanywhere.com/',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -70,6 +72,14 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -89,20 +99,18 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
 USE_TZ = True
 
-
-
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    '/var/www/static/',  
+    '/var/www/static/',
     'C:/Users/WELCOME/Documents/Project_U/Investconnect/static',
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'app.UserModel'
+AUTH_USER_MODEL = 'userapp.UserModel'
