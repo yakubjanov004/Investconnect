@@ -4,10 +4,6 @@ from .models import UserModel
 from app import models
 from rest_framework.exceptions import ValidationError
 from django.core.validators import RegexValidator
-from django.core.files.base import ContentFile
-import requests
-import os
-
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,12 +74,17 @@ class GetCategorySerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     category = GetCategorySerializer(read_only=True)
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name','image','category', 'price'
+            'id', 'name', 'category', 'price', 'image', 'images'
         )
+
+    def get_images(self, obj):
+        return [image.image.url for image in obj.images.all()]
+
 
 
 
@@ -112,23 +113,36 @@ class PrivateInformationSerializer(serializers.ModelSerializer):
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    private_information = PrivateInformationSerializer()
+    product_images = serializers.ListField(
+        child=serializers.ImageField(),
+        write_only=True,
+        required=False
+    )
+    product_file = serializers.FileField(allow_null=True, required=False)
 
     class Meta:
         model = models.Product
         fields = (
-            'user', 'name', 'rendement', 'location', 'image',
-            'description', 'category','price', 'product_file',
-            'private_information'
+            'user', 'name', 'rendement', 'location', 'description', 'category', 'price', 'product_file', 'product_images'
         )
 
     def create(self, validated_data):
-        private_information_data = validated_data.pop('private_information', None)
+        product_images_data = validated_data.pop('product_images', [])
+        product_file_data = validated_data.pop('product_file', None) 
         product = models.Product.objects.create(**validated_data)
-        if private_information_data:
-            private_info = models.PrivateInformation.objects.create(product=product, **private_information_data)
-            product.private_information = private_info
+        
+        if product_file_data:
+            product.product_file = product_file_data
+            product.save()
+
+        for image in product_images_data:
+            models.ProductImage.objects.create(product=product, image=image)
+
         return product
+
+
+
+
 
 
 

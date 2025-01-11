@@ -15,10 +15,10 @@ class Product(BaseModel):
     name = models.CharField(max_length=50)
     description = models.TextField()
     location = models.CharField(max_length=100)
-    image = models.ImageField(upload_to="products/")
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, null=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, default=1)
     rendement = models.CharField(max_length=5)
+    image = models.ImageField(upload_to="product_images/", null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     product_file = models.FileField(upload_to="product_file", blank=True, null=True)
 
@@ -28,6 +28,15 @@ class Product(BaseModel):
     def __str__(self):
         return self.name
 
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey('Product', related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="product_images/")
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+    
 
 class PrivateInformation(BaseModel):
     class DegreeChoicess(models.TextChoices):

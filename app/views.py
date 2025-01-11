@@ -16,6 +16,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 
 
 class UserRegister(APIView):
@@ -185,7 +186,7 @@ class UserModelListAPIView(ListAPIView):
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
-    filter_backends =  [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ('category__name',)
     search_fields = ('name',)
 
@@ -212,6 +213,24 @@ class CommentListAPIView(ListAPIView):
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = models.Product.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        product_images = request.FILES.getlist('product_images') 
+        data = request.data.copy() 
+        data['product_images'] = product_images  
+
+        if len(product_images) > 8:
+            raise ValidationError({"error": "Siz bir vaqtning o'zida 8 tadan ortiq rasm yuborishingiz mumkin emas."})
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        product = serializer.save()
+
+        for image in product_images:
+            ProductImage.objects.create(product=product, image=image)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
@@ -261,10 +280,10 @@ class UserProductListView(APIView):
         return Response(serializer.data)
     
 class PublicProductsView(APIView):
-    def get(self, request, *args, **kwargs):
-        products = models.Product.objects.all()  # Faol bo'lmagan mahsulotlar ko'rinadi
-        data = [
-            {
+    def get(self, request, id, *args, **kwargs):
+        try:
+            product = models.Product.objects.get(id=id)
+            data = {
                 "name": product.name,
                 "description": product.description,
                 "location": product.location,
@@ -272,9 +291,10 @@ class PublicProductsView(APIView):
                 "price": product.price,
                 "category": product.category.name if product.category else None,
             }
-            for product in products
-        ]
-        return Response({"products": data})
+            return Response({"product": data})
+        
+        except models.Product.DoesNotExist:
+            raise NotFound(detail="Product not found")
 
 
 
@@ -282,7 +302,6 @@ class PrivateProductDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, product_id, *args, **kwargs):
-        # To'lov qilinganligini tekshirish
         payment = models.Payment.objects.filter(
             investor=request.user,
             product_id=product_id,
