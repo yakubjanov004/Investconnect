@@ -70,6 +70,7 @@ class CodeAPI(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         
 
+
 class GetUserAPI(APIView):
   permission_classes = [IsAuthenticated]
 
@@ -77,10 +78,8 @@ class GetUserAPI(APIView):
     try:
       users = UserModel.objects.all()
       user_data = []
-
       for user in users:
         profile_image_url = user.profile_image.url if user.profile_image else None
-
         user_data.append({
           "id": user.id,
           "firstname": user.firstname,
@@ -90,12 +89,12 @@ class GetUserAPI(APIView):
           "email": user.email,
           "role": user.role,
         })
-
       return Response(user_data, status=status.HTTP_200_OK)
-
     except Exception as e:
       return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -114,6 +113,7 @@ class GetProfileAPI(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -127,30 +127,26 @@ class VerifyAPIView(APIView):
         if timezone.now() > user.expire_date:
             user.delete()  
             raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
-
         if code != user.code:
             raise ValidationError({"error": "Kod noto‘g‘ri."})
-
         user.status = UserModel.UserAuthStatus.APPROVED
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
-
         return Response(data={"token": token.key, "user": user.id})
     
+
+
 class ResendCodeAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone')  
         if not phone:
-            raise ValidationError({"error": "Telefon raqamni kiriting."})
-        
+            raise ValidationError({"error": "Telefon raqamni kiriting."})        
         try:
             user = UserModel.objects.get(phone=phone, status=UserModel.UserAuthStatus.NEW)
         except UserModel.DoesNotExist:
             raise ValidationError({"error": "Telefon raqam topilmadi yoki foydalanuvchi allaqachon tasdiqlangan."})
-    
-
         if user.expire_date is None or user.expire_date < timezone.now():
             print("asa")
             user.generate_verification_code()
@@ -169,14 +165,14 @@ class LoginAPIView(APIView):
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
             password = serializer.validated_data['password']
-            user = authenticate(request=request, username=phone, password=password)
-            
+            user = authenticate(request=request, username=phone, password=password)           
             if user:
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 class UserModelListAPIView(ListAPIView):
@@ -192,6 +188,8 @@ class ProductListAPIView(ListAPIView):
     filter_backends =  [DjangoFilterBackend,SearchFilter]
     filterset_fields = ('category__name',)
     search_fields = ('name',)
+
+
 
 class ProductInformationAPIView(generics.RetrieveAPIView):
     serializer_class = serializers.ProductinformationSerializer
@@ -216,6 +214,7 @@ class ProductCreateAPIView(CreateAPIView):
     queryset = models.Product.objects.all()
 
 
+
 class UserUpdateAPIView(UpdateAPIView):
     serializer_class = serializers.UserUpdateSerializer
     permission_classes = [IsAuthenticated]
@@ -224,10 +223,13 @@ class UserUpdateAPIView(UpdateAPIView):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
 
 
+
 class ProductDetail(generics.RetrieveAPIView):
     queryset = models.Product.objects.all()  
     serializer_class = serializers.ProductDetailSerializer  
     lookup_field = 'id'
+
+
 
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
@@ -236,13 +238,19 @@ class ProfilDetailAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
 
+
+
 class CategoryListView(generics.ListAPIView):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
 
+
+
 class CreatInformationView(generics.CreateAPIView):
     queryset = models.PrivateInformation.objects.all()
     serializer_class = serializers.InformationSerializer
+
+
 
 class UserProductListView(APIView):
     permission_classes = [IsAuthenticated]

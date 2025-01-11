@@ -14,11 +14,15 @@ class UserModelSerializer(serializers.ModelSerializer):
         model = models.UserModel
         fields = ('id', 'firstname', 'phone', 'lastname', 'email', 'role')
 
+
+
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('firstname', 'lastname', 'role')
         read_only = True
+
+
 
 class Userserializer(serializers.Serializer):
     username = serializers.CharField(max_length=30, validators=[ 
@@ -37,9 +41,12 @@ class Userserializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+
 class VerifySerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
     code = serializers.CharField()
+
+
 
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
@@ -61,10 +68,6 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-
-
-
-
 class GetCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
@@ -74,8 +77,6 @@ class GetCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    # user = GetUserSerializer(read_only=True)
-    # contract = ContractNameSerializer(read_only=True)
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
@@ -84,11 +85,15 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name','image','category', 'price'
         )
 
+
+
 class ProductInforationNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = ('name',)
         read_only = True
+
+
 
 class ProductinformationSerializer(serializers.ModelSerializer):
     product = ProductInforationNameSerializer(read_only=True)
@@ -97,10 +102,13 @@ class ProductinformationSerializer(serializers.ModelSerializer):
         model = models.PrivateInformation
         exclude = ('created_at',  'updated_at')
 
+
+
 class PrivateInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PrivateInformation
         fields = ('kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
+
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
@@ -110,7 +118,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
         model = models.Product
         fields = (
             'user', 'name', 'rendement', 'location', 'image',
-            'description', 'category','price',
+            'description', 'category','price', 'product_file',
             'private_information'
         )
 
@@ -121,6 +129,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
             private_info = models.PrivateInformation.objects.create(product=product, **private_information_data)
             product.private_information = private_info
         return product
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -137,6 +146,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ('firstname', 'lastname', 'phone',)
+
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -174,17 +184,20 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         instance.save()
         return instance
 
-CreateProductSerializer
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
         fields = ['id', 'name', "img"]
 
+
+
 class InformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PrivateInformation
         exclude = ('created_at',  'updated_at')
+
 
 
 class UserProductSerializer(serializers.ModelSerializer):

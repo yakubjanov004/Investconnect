@@ -4,12 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.deconstruct import deconstructible
 from django.core import validators
 
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         abstract = True
+
 
 @deconstructible
 class UnicodePhoneValidator(validators.RegexValidator):
@@ -19,6 +21,7 @@ class UnicodePhoneValidator(validators.RegexValidator):
     )
     flags = 0
 phone_validator = UnicodePhoneValidator()
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -47,7 +50,6 @@ class UserModel(AbstractUser):
     class RoleChoicess(models.TextChoices):
         INVESTOR = 'investor', 'Investor'
         STARTUP = 'startup', 'Startup'
-    
     firstname = models.CharField(max_length=30)
     lastname = models.CharField(max_length=50)
     email = models.EmailField()
@@ -62,7 +64,6 @@ class UserModel(AbstractUser):
             "unique": _("Bu username ga ega foydalanuvchi allaqachon mavjud."),
         },
     )
-
     phone = models.CharField(
         _("phone"),
         max_length=13,  
@@ -73,14 +74,14 @@ class UserModel(AbstractUser):
             "unique": _("Bu telefon raqamiga ega foydalanuvchi allaqachon mavjud."),
         },
     )
-    
+
     class UserAuthStatus(models.TextChoices):
         NEW = "new", "Yangi"
         APPROVED = "approved", "Tasdiqlangan"
     
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
- 
+
     objects = CustomUserManager()
     
     status = models.CharField(
@@ -100,5 +101,3 @@ class UserModel(AbstractUser):
 
     def __str__(self):
         return f"{self.id}- {self.username} - {self.firstname} - {self.lastname}"
-
-
