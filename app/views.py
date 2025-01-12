@@ -207,9 +207,15 @@ class ProductCreateAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = serializers.ProductCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+            product = serializer.save()  
+            
+            private_info_data = request.data.get('private_information')
+            if private_info_data:
+                models.PrivateInformation.objects.create(product=product, **private_info_data)
+
+            return Response(serializers.ProductCreateSerializer(product).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 

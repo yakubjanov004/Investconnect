@@ -97,21 +97,28 @@ class PrivateInformationSerializer(serializers.ModelSerializer):
         model = models.PrivateInformation
         fields = ['kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi']
 
+
+
 class ProductCreateSerializer(serializers.ModelSerializer):
-    private_information = PrivateInformationSerializer()
+    private_information = PrivateInformationSerializer(read_only=True)  
 
     class Meta:
         model = models.Product
         fields = [
-            'name', 'description', 'location', 'user', 'category', 
+            'name', 'description', 'location', 'user', 'category',
             'rendement', 'image', 'price', 'product_file', 'private_information'
         ]
 
     def create(self, validated_data):
-        private_info_data = validated_data.pop('private_information')
+        private_info_data = validated_data.pop('private_information', None)
+
         product = models.Product.objects.create(**validated_data)
-        models.PrivateInformation.objects.create(product=product, **private_info_data)
+
+        if private_info_data:
+            models.PrivateInformation.objects.create(product=product, **private_info_data)
+
         return product
+
 
 
 

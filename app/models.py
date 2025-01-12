@@ -15,7 +15,7 @@ class Product(BaseModel):
     name = models.CharField(max_length=50)
     description = models.TextField()
     location = models.CharField(max_length=100)
-    user = models.ForeignKey(UserModel, on_delete=models.PROTECT, null=True)
+    user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, default=1)
     rendement = models.CharField(max_length=5)
     image = models.ImageField(upload_to="product_images/", null=True, blank=True)
@@ -32,7 +32,7 @@ class PrivateInformation(BaseModel):
     class DegreeChoicess(models.TextChoices):
         AKTIV = 'aktiv', 'Aktiv'
         DEAKTIV = 'deaktiv', 'Deaktiv'
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, null=True)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     status = models.CharField(max_length=30, choices=DegreeChoicess.choices, default=DegreeChoicess.AKTIV)
     kampanya_egasi = models.CharField(max_length=50)
     kontact = models.CharField(max_length=50)
