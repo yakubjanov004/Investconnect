@@ -74,18 +74,12 @@ class GetCategorySerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     category = GetCategorySerializer(read_only=True)
-    images = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name', 'category', 'price', 'image', 'images'
+            'id', 'name', 'category', 'price', 'image'
         )
-
-    def get_images(self, obj):
-        return [image.image.url for image in obj.images.all()]
-
-
 
 
 class ProductInforationNameSerializer(serializers.ModelSerializer):
