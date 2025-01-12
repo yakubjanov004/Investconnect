@@ -213,22 +213,25 @@ class CommentListAPIView(ListAPIView):
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = models.Product.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        product_images = request.FILES.getlist('product_images') 
-        data = request.data.copy() 
-        data['product_images'] = product_images  
+        product_image = request.FILES.get('product_image')  
+        data = request.data.copy()
 
-        if len(product_images) > 8:
-            raise ValidationError({"error": "Siz bir vaqtning o'zida 8 tadan ortiq rasm yuborishingiz mumkin emas."})
+        data['user'] = request.user.id  
+
+        if product_image and len(request.FILES) > 1:
+            raise ValidationError({"error": "Siz bir vaqtning o'zida faqat bitta rasm yuborishingiz mumkin."})
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
         product = serializer.save()
 
-        for image in product_images:
-            ProductImage.objects.create(product=product, image=image)
+        if product_image:
+            product.image = product_image
+            product.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

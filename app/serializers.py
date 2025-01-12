@@ -113,30 +113,28 @@ class PrivateInformationSerializer(serializers.ModelSerializer):
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    product_images = serializers.ListField(
-        child=serializers.ImageField(),
-        write_only=True,
-        required=False
-    )
+    product_image = serializers.ImageField(write_only=True, required=False) 
     product_file = serializers.FileField(allow_null=True, required=False)
 
     class Meta:
         model = models.Product
         fields = (
-            'user', 'name', 'rendement', 'location', 'description', 'category', 'price', 'product_file', 'product_images'
+            'user', 'name', 'rendement', 'location', 'description', 'category', 'price', 'product_file', 'product_image'
         )
 
     def create(self, validated_data):
-        product_images_data = validated_data.pop('product_images', [])
+        product_image_data = validated_data.pop('product_image', None) 
         product_file_data = validated_data.pop('product_file', None) 
+
         product = models.Product.objects.create(**validated_data)
-        
+
         if product_file_data:
             product.product_file = product_file_data
             product.save()
 
-        for image in product_images_data:
-            models.ProductImage.objects.create(product=product, image=image)
+        if product_image_data:
+            product.image = product_image_data
+            product.save()
 
         return product
 
