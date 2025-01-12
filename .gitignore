@@ -14,6 +14,11 @@ media/
 static/
 venv/
 stash/
+products/
+product_images/
+user_profile/
+category/
+product_file/
 
 *.log
 *.sqlite3
