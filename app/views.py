@@ -291,7 +291,7 @@ class PublicProductsView(APIView):
                 "price": product.price,
                 "category": product.category.name if product.category else None,
             }
-            return Response({"product": data})
+            return Response(data)
         
         except models.Product.DoesNotExist:
             raise NotFound(detail="Product not found")

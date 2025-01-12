@@ -173,7 +173,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('username', 'firstname', 'lastname', 'profile_image', 'email')
+        fields = ('username', 'firstname', 'lastname', 'profile_image', 'email', 'role')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.context['request'].method in ['PUT', 'PATCH']:
+            self.fields.pop('role', None)
 
     def validate_profile_image(self, value):
         if value and not value.name.endswith(('.jpg', '.png', '.jpeg',)):
@@ -184,6 +189,7 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         profile_image = validated_data.pop('profile_image', None)
         if profile_image:
             instance.profile_image = profile_image
+        
         instance = super().update(instance, validated_data)
         instance.save()
         return instance
@@ -210,8 +216,10 @@ class UserProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = (
-            'id', 'name','image','category', 'price'
+            'id', 'name', 'image', 'category', 'price' 
         )
+
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
