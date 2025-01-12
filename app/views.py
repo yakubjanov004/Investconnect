@@ -207,7 +207,7 @@ class ProductCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        product_data = request.data
+        product_data = request.data.copy()  
         product_image = request.FILES.get('product_image')
         product_file = request.FILES.get('product_file')  
 
@@ -229,7 +229,7 @@ class ProductCreateAPIView(APIView):
                 product.save()
 
             private_info_data = {
-                'product': product,  
+                'product': product.id,  # Передаем ID созданного продукта
                 'kampanya_egasi': product_data.get('kampanya_egasi', ''),
                 'kontact': product_data.get('kontact', ''),
                 'campany_name': product_data.get('campany_name', ''),
@@ -251,6 +251,8 @@ class ProductCreateAPIView(APIView):
                 return Response(private_info_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
