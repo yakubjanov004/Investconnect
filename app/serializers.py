@@ -96,24 +96,9 @@ class ProductInforationNameSerializer(serializers.ModelSerializer):
 
 
 
-class ProductinformationSerializer(serializers.ModelSerializer):
-    product = ProductInforationNameSerializer(read_only=True)
-
-    class Meta:
-        model = models.PrivateInformation
-        exclude = ('created_at',  'updated_at')
-
-
-
-class PrivateInformationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.PrivateInformation
-        fields = ('kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
-
-
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    product_image = serializers.ImageField(write_only=True, required=False) 
+    product_image = serializers.ImageField(write_only=True, required=False)
     product_file = serializers.FileField(allow_null=True, required=False)
 
     class Meta:
@@ -123,20 +108,27 @@ class CreateProductSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        product_image_data = validated_data.pop('product_image', None) 
-        product_file_data = validated_data.pop('product_file', None) 
+        product_image = validated_data.pop('product_image', None)
+        product_file = validated_data.pop('product_file', None)
 
         product = models.Product.objects.create(**validated_data)
 
-        if product_file_data:
-            product.product_file = product_file_data
+        if product_image:
+            product.image = product_image
             product.save()
 
-        if product_image_data:
-            product.image = product_image_data
+        if product_file:
+            product.product_file = product_file
             product.save()
 
         return product
+
+
+
+class PrivateInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PrivateInformation
+        fields = ('product', 'kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
 
 
 

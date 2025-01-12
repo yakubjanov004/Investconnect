@@ -192,13 +192,6 @@ class ProductListAPIView(ListAPIView):
 
 
 
-class ProductInformationAPIView(generics.RetrieveAPIView):
-    serializer_class = serializers.ProductinformationSerializer
-    queryset = models.PrivateInformation.objects.all()
-    lookup_field = 'id'
-
-
-
 class CommentListAPIView(ListAPIView):
     serializer_class = serializers.CommentSerializer
 
@@ -210,30 +203,54 @@ class CommentListAPIView(ListAPIView):
 
 
 
-class ProductCreateAPIView(CreateAPIView):
-    serializer_class = serializers.CreateProductSerializer
-    queryset = models.Product.objects.all()
+class ProductCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        product_image = request.FILES.get('product_image')  
-        data = request.data.copy()
+    def post(self, request, *args, **kwargs):
+        product_data = request.data
+        product_image = request.FILES.get('product_image')
+        product_file = request.FILES.get('product_file')  
 
-        data['user'] = request.user.id  
+        product_data['user'] = request.user.id
 
         if product_image and len(request.FILES) > 1:
-            raise ValidationError({"error": "Siz bir vaqtning o'zida faqat bitta rasm yuborishingiz mumkin."})
+            raise ValidationError({"error": "You can only upload one image at a time."})
 
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        product_serializer = serializers.CreateProductSerializer(data=product_data)
+        if product_serializer.is_valid():
+            product = product_serializer.save() 
 
-        product = serializer.save()
+            if product_image:
+                product.image = product_image
+                product.save()
 
-        if product_image:
-            product.image = product_image
-            product.save()
+            if product_file:
+                product.product_file = product_file
+                product.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            private_info_data = {
+                'product': product,  
+                'kampanya_egasi': product_data.get('kampanya_egasi', ''),
+                'kontact': product_data.get('kontact', ''),
+                'campany_name': product_data.get('campany_name', ''),
+                'oylik_daromadi': product_data.get('oylik_daromadi', 0.00),
+                'soff_foydasi': product_data.get('soff_foydasi', 0.00),
+            }
+
+            private_info_serializer = serializers.PrivateInformationSerializer(data=private_info_data)
+            if private_info_serializer.is_valid():
+                private_info_serializer.save()  
+
+                return Response({
+                    'product': product_serializer.data,
+                    'private_information': private_info_serializer.data
+                }, status=status.HTTP_201_CREATED)
+
+            else:
+                product.delete()
+                return Response(private_info_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

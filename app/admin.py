@@ -40,13 +40,9 @@ class CommentAdmin(admin.ModelAdmin):
     short_description.short_description = "Sharh"
 
 
-class ProductImageInline(admin.TabularInline):
-    model = models.ProductImage
-    extra = 0
 
 
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageInline]  
     list_display = ('name', 'category', 'price', 'user', 'rendement')
     search_fields = ('name', 'category__name')
     list_filter = ('category', 'user')
@@ -56,5 +52,4 @@ admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Comment, CommentAdmin)
 admin.site.register(models.Product, ProductAdmin)
 admin.site.register(models.PrivateInformation, InformationAdmin)
-admin.site.register(models.ProductImage)
 admin.site.register(models.Payment)
