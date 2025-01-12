@@ -173,7 +173,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('username', 'firstname', 'lastname', 'profile_image', 'email')
+        fields = ('username', 'firstname', 'lastname', 'profile_image', 'email', 'role')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['role'] = instance.role  
+        return representation
 
     def validate_profile_image(self, value):
         if value and not value.name.endswith(('.jpg', '.png', '.jpeg',)):
@@ -181,12 +186,17 @@ class ProfilDetailSerializers(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
+        if 'role' in validated_data:
+            raise serializers.ValidationError({"role": "Role maydoni o'zgartirilishi mumkin emas."})
+        
         profile_image = validated_data.pop('profile_image', None)
         if profile_image:
             instance.profile_image = profile_image
+        
         instance = super().update(instance, validated_data)
         instance.save()
         return instance
+
 
 
 
