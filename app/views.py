@@ -347,7 +347,6 @@ class PaymentAndCheckView(APIView):
         except models.Product.DoesNotExist:
             return Response({"error": "Mahsulot topilmadi"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Foydalanuvchi to'lovni tekshiradi
         payment = models.Payment.objects.filter(investor=request.user, product=product, is_active=True).first()
 
         if payment:
