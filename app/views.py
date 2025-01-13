@@ -283,37 +283,27 @@ class PublicProductsView(APIView):
 
 
 
-class PrivateProductDetailsView(APIView):
+class ProductCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, product_id, *args, **kwargs):
-        payment = models.Payment.objects.filter(
-            investor=request.user,
-            product_id=product_id,
-            is_active=True
-        ).exists()
-
-        if not payment:
-            return Response({"error": "To'lov qilinmagan"}, status=403)
+    def post(self, request, *args, **kwargs):
+        product_data = request.data
+        private_info_data = product_data.get('private_information', {})
 
         try:
-            private_info = models.PrivateInformation.objects.get(product_id=product_id)
-        except models.PrivateInformation.DoesNotExist:
-            return Response({"error": "Maxsus ma'lumot topilmadi"}, status=404)
+            private_info = models.PrivateInformation.objects.create(**private_info_data)
+        except Exception as e:
+            return Response({"error": f"PrivateInformation yaratishda xatolik: {str(e)}"}, status=400)
 
-        data = {
-            "status": private_info.status,
-            "kampanya_egasi": private_info.kampanya_egasi,
-            "kontact": private_info.kontact,
-            "campany_name": private_info.campany_name,
-            "oylik_daromadi": private_info.oylik_daromadi,
-            "soff_foydasi": private_info.soff_foydasi,
-        }
-        return Response({"private_info": data})
-
-
-
-
+        try:
+            product_data['private_information'] = private_info 
+            product = models.Product.objects.create(**product_data)
+            return Response({
+                "message": "Product successfully created.",
+                "product": product.name
+            }, status=201)
+        except Exception as e:
+            return Response({"error": f"Product yaratishda xatolik: {str(e)}"}, status=400)
 
 
 
