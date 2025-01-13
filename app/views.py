@@ -283,27 +283,148 @@ class PublicProductsView(APIView):
 
 
 
-class ProductCreateView(APIView):
+class PrivateProductDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, product_id, *args, **kwargs):
+        payment = models.Payment.objects.filter(
+            investor=request.user,
+            product_id=product_id,
+            is_active=True
+        ).exists()
+
+        if not payment:
+            return Response({"error": "To'lov qilinmagan"}, status=403)
+
+        try:
+            private_info = models.PrivateInformation.objects.get(product_id=product_id)
+        except models.PrivateInformation.DoesNotExist:
+            return Response({"error": "Maxsus ma'lumot topilmadi"}, status=404)
+
+        data = {
+            "status": private_info.status,
+            "kampanya_egasi": private_info.kampanya_egasi,
+            "kontact": private_info.kontact,
+            "campany_name": private_info.campany_name,
+            "oylik_daromadi": private_info.oylik_daromadi,
+            "soff_foydasi": private_info.soff_foydasi,
+        }
+        return Response({"private_info": data})
+
+
+
+
+
+
+
+class ProductCreateAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        product_data = request.data
-        private_info_data = product_data.get('private_information', {})
+        serializer = serializers.ProductCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            product = serializer.save()  
+            
+            private_info_data = request.data.get('private_information')
+            if private_info_data:
+                models.PrivateInformation.objects.create(product=product, **private_info_data)
+
+            return Response(serializers.ProductCreateSerializer(product).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class UserUpdateAPIView(UpdateAPIView):
+    serializer_class = serializers.UserUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(models.UserModel, id=self.request.user.id)
+
+
+
+class ProductDetail(generics.RetrieveAPIView):
+    queryset = models.Product.objects.all()  
+    serializer_class = serializers.ProductDetailSerializer  
+    lookup_field = 'id'
+
+
+
+class ProfilDetailAPIView(RetrieveUpdateAPIView):
+    serializer_class = serializers.ProfilDetailSerializers
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(models.UserModel, id=self.request.user.id)
+
+
+
+class CategoryListView(generics.ListAPIView):
+    queryset = models.Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+
+
+
+class CreatInformationView(generics.CreateAPIView):
+    queryset = models.PrivateInformation.objects.all()
+    serializer_class = serializers.InformationSerializer
+
+
+
+class UserProductListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_products = models.Product.objects.filter(user=request.user)
+        serializer = serializers.UserProductSerializer(user_products, many=True)
+        return Response(serializer.data)
+    
+class PublicProductsView(APIView):
+    def get(self, request, id, *args, **kwargs):
+        try:
+            product = models.Product.objects.get(id=id)
+            data = {
+                "name": product.name,
+                "description": product.description,
+                "location": product.location,
+                "image": product.image.url if product.image else None,
+                "price": product.price,
+                "category": product.category.name if product.category else None,
+            }
+            return Response(data)
+        
+        except models.Product.DoesNotExist:
+            raise NotFound(detail="Product not found")
+
+
+
+class PrivateProductDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, product_id, *args, **kwargs):
+        payment = models.Payment.objects.filter(
+            investor=request.user,
+            product_id=product_id,
+            is_active=True
+        ).exists()
+
+        if not payment:
+            return Response({"error": "To'lov qilinmagan"}, status=403)
 
         try:
-            private_info = models.PrivateInformation.objects.create(**private_info_data)
-        except Exception as e:
-            return Response({"error": f"PrivateInformation yaratishda xatolik: {str(e)}"}, status=400)
+            private_info = models.PrivateInformation.objects.get(product_id=product_id)
+        except models.PrivateInformation.DoesNotExist:
+            return Response({"error": "Maxsus ma'lumot topilmadi"}, status=404)
 
-        try:
-            product_data['private_information'] = private_info 
-            product = models.Product.objects.create(**product_data)
-            return Response({
-                "message": "Product successfully created.",
-                "product": product.name
-            }, status=201)
-        except Exception as e:
-            return Response({"error": f"Product yaratishda xatolik: {str(e)}"}, status=400)
+        data = {
+            "status": private_info.status,
+            "kampanya_egasi": private_info.kampanya_egasi,
+            "kontact": private_info.kontact,
+            "campany_name": private_info.campany_name,
+            "oylik_daromadi": private_info.oylik_daromadi,
+            "soff_foydasi": private_info.soff_foydasi,
+        }
+        return Response({"private_info": data})
+
 
 
 
@@ -355,6 +476,6 @@ class UserPurchasedProductsView(ListAPIView):
 
     def get_queryset(self):
         return models.Product.objects.filter(
-            payment__investor=self.request.user,  # Foydalanuvchi to'lovlari
-            payment__is_active=True  # Faqat faol to'lovlar
+            payment__investor=self.request.user,  
+            payment__is_active=True  
         ).distinct()
