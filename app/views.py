@@ -16,6 +16,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 
 
 class UserRegister(APIView):
@@ -70,6 +71,7 @@ class CodeAPI(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         
 
+
 class GetUserAPI(APIView):
   permission_classes = [IsAuthenticated]
 
@@ -77,10 +79,8 @@ class GetUserAPI(APIView):
     try:
       users = UserModel.objects.all()
       user_data = []
-
       for user in users:
         profile_image_url = user.profile_image.url if user.profile_image else None
-
         user_data.append({
           "id": user.id,
           "firstname": user.firstname,
@@ -90,12 +90,12 @@ class GetUserAPI(APIView):
           "email": user.email,
           "role": user.role,
         })
-
       return Response(user_data, status=status.HTTP_200_OK)
-
     except Exception as e:
       return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
+
 class GetProfileAPI(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -114,6 +114,7 @@ class GetProfileAPI(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class VerifyAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -127,30 +128,26 @@ class VerifyAPIView(APIView):
         if timezone.now() > user.expire_date:
             user.delete()  
             raise ValidationError({"error": "Kod muddati tugagan, foydalanuvchi o‘chirildi."})
-
         if code != user.code:
             raise ValidationError({"error": "Kod noto‘g‘ri."})
-
         user.status = UserModel.UserAuthStatus.APPROVED
         user.save()
         token, _ = Token.objects.get_or_create(user=user)
-
         return Response(data={"token": token.key, "user": user.id})
     
+
+
 class ResendCodeAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone')  
         if not phone:
-            raise ValidationError({"error": "Telefon raqamni kiriting."})
-        
+            raise ValidationError({"error": "Telefon raqamni kiriting."})        
         try:
             user = UserModel.objects.get(phone=phone, status=UserModel.UserAuthStatus.NEW)
         except UserModel.DoesNotExist:
             raise ValidationError({"error": "Telefon raqam topilmadi yoki foydalanuvchi allaqachon tasdiqlangan."})
-    
-
         if user.expire_date is None or user.expire_date < timezone.now():
             print("asa")
             user.generate_verification_code()
@@ -169,14 +166,14 @@ class LoginAPIView(APIView):
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
             password = serializer.validated_data['password']
-            user = authenticate(request=request, username=phone, password=password)
-            
+            user = authenticate(request=request, username=phone, password=password)           
             if user:
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 class UserModelListAPIView(ListAPIView):
@@ -189,14 +186,9 @@ class UserModelListAPIView(ListAPIView):
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product.objects.all()
-    filter_backends =  [DjangoFilterBackend,SearchFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ('category__name',)
     search_fields = ('name',)
-
-class ProductInformationAPIView(generics.RetrieveAPIView):
-    serializer_class = serializers.ProductinformationSerializer
-    queryset = models.PrivateInformation.objects.all()
-    lookup_field = 'id'
 
 
 
@@ -211,9 +203,20 @@ class CommentListAPIView(ListAPIView):
 
 
 
-class ProductCreateAPIView(CreateAPIView):
-    serializer_class = serializers.CreateProductSerializer
-    queryset = models.Product.objects.all()
+class ProductCreateAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.ProductCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            product = serializer.save()  
+            
+            private_info_data = request.data.get('private_information')
+            if private_info_data:
+                models.PrivateInformation.objects.create(product=product, **private_info_data)
+
+            return Response(serializers.ProductCreateSerializer(product).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class UserUpdateAPIView(UpdateAPIView):
@@ -224,10 +227,13 @@ class UserUpdateAPIView(UpdateAPIView):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
 
 
+
 class ProductDetail(generics.RetrieveAPIView):
     queryset = models.Product.objects.all()  
     serializer_class = serializers.ProductDetailSerializer  
     lookup_field = 'id'
+
+
 
 class ProfilDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = serializers.ProfilDetailSerializers
@@ -236,13 +242,19 @@ class ProfilDetailAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return get_object_or_404(models.UserModel, id=self.request.user.id)
 
+
+
 class CategoryListView(generics.ListAPIView):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
 
+
+
 class CreatInformationView(generics.CreateAPIView):
     queryset = models.PrivateInformation.objects.all()
     serializer_class = serializers.InformationSerializer
+
+
 
 class UserProductListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -253,10 +265,10 @@ class UserProductListView(APIView):
         return Response(serializer.data)
     
 class PublicProductsView(APIView):
-    def get(self, request, *args, **kwargs):
-        products = models.Product.objects.all()  # Faol bo'lmagan mahsulotlar ko'rinadi
-        data = [
-            {
+    def get(self, request, id, *args, **kwargs):
+        try:
+            product = models.Product.objects.get(id=id)
+            data = {
                 "name": product.name,
                 "description": product.description,
                 "location": product.location,
@@ -264,44 +276,34 @@ class PublicProductsView(APIView):
                 "price": product.price,
                 "category": product.category.name if product.category else None,
             }
-            for product in products
-        ]
-        return Response({"products": data})
+            return Response(data)
+        
+        except models.Product.DoesNotExist:
+            raise NotFound(detail="Product not found")
 
 
 
-class PrivateProductDetailsView(APIView):
+class ProductCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, product_id, *args, **kwargs):
-        # To'lov qilinganligini tekshirish
-        payment = models.Payment.objects.filter(
-            investor=request.user,
-            product_id=product_id,
-            is_active=True
-        ).exists()
-
-        if not payment:
-            return Response({"error": "To'lov qilinmagan"}, status=403)
+    def post(self, request, *args, **kwargs):
+        product_data = request.data
+        private_info_data = product_data.get('private_information', {})
 
         try:
-            private_info = models.PrivateInformation.objects.get(product_id=product_id)
-        except models.PrivateInformation.DoesNotExist:
-            return Response({"error": "Maxsus ma'lumot topilmadi"}, status=404)
+            private_info = models.PrivateInformation.objects.create(**private_info_data)
+        except Exception as e:
+            return Response({"error": f"PrivateInformation yaratishda xatolik: {str(e)}"}, status=400)
 
-        data = {
-            "status": private_info.status,
-            "kampanya_egasi": private_info.kampanya_egasi,
-            "kontact": private_info.kontact,
-            "campany_name": private_info.campany_name,
-            "oylik_daromadi": private_info.oylik_daromadi,
-            "soff_foydasi": private_info.soff_foydasi,
-        }
-        return Response({"private_info": data})
-
-
-
-
+        try:
+            product_data['private_information'] = private_info 
+            product = models.Product.objects.create(**product_data)
+            return Response({
+                "message": "Product successfully created.",
+                "product": product.name
+            }, status=201)
+        except Exception as e:
+            return Response({"error": f"Product yaratishda xatolik: {str(e)}"}, status=400)
 
 
 
@@ -320,7 +322,6 @@ class PaymentAndCheckView(APIView):
         except models.Product.DoesNotExist:
             return Response({"error": "Mahsulot topilmadi"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Foydalanuvchi to'lovni tekshiradi
         payment = models.Payment.objects.filter(investor=request.user, product=product, is_active=True).first()
 
         if payment:
