@@ -1,43 +1,19 @@
 */migrations/*
 !*/migrations/__init__.py
 
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-*.svg
-*.webp
-
 media/
 static/
-venv/
-stash/
-products/
-product_images/
-user_profile/
-category/
-product_file/
 
-*.log
+venv/
+
+
 *.sqlite3
-*.env
-*.pyc
-*.pyo
+*.log
 *.db
 
 *.pyc
 *.pyo
 __pycache__/
-
-*.coveragerc
-*.tox/
-*.nox/
-*.coverage
-*.hypothesis/
-
-db.sqlite3
 
 .vscode/
 .idea/
@@ -49,3 +25,9 @@ Thumbs.db
 *.swp
 *.swo
 *.tmp
+
+product_file/
+category/
+user_profile/
+product_images/
+products/
