@@ -76,7 +76,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
-        model = models.Product
+        model = models.Product_1
         fields = (
             'id', 'name', 'category', 'price', 'image'
         )
@@ -193,15 +193,69 @@ class UserProductSerializer(serializers.ModelSerializer):
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
-        model = models.Product
+        model = models.Product_1
         fields = (
-            'id', 'name', 'image', 'category', 'price' 
+            'id', 'name', 'image', 'category', 'price', 'created_at' 
         )
 
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Product
-        fields = ['id', 'name', 'price', 'image']
+        model = models.Product_1
+        fields = ['id', 'name', 'price', 'image', 'created_at' ]
 
+                            # /////--------------------------------########/////---------------------#
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Product_1
+        fields = [
+            'id', 
+            'name', 
+            'description', 
+            'location', 
+            'image', 
+            'user', 
+            'category', 
+            'rendement', 
+            'price', 
+            'is_active',
+            'short_description',  # Umumiy ma'lumotlar
+            'investment_range',   # Kerakli sarmoya diapazoni
+            'team_info',          # Jamoa haqida umumiy ma'lumot
+            'business_plan',      # Batafsil biznes-reja
+            'use_of_investment',  # Sarmoya foydalanish rejalari
+            'financial_forecasts', # Moliyaviy prognozlar
+            'prototype_demo',     # Prototip yoki demo
+            'team_details',       # Jamoa a'zosining rezume va tajribasi
+            'market_analysis',    # Bozor va raqobat tahlili
+            'legal_documents',    # Yuridik hujjatlar
+            'contact_info',       # Bog'lanish ma'lumotlari
+        ]
+
+
+
+# Serializer for open data
+class ProductPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product_1
+        fields = [
+            'id',
+            'name',
+            'description',
+            'location',
+            'image',
+            'price',
+            'rendement',
+            'short_description',
+            'investment_range',
+        ]
+
+# Serializer for private data
+class ProductPrivateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product_1
+        fields = '__all__'

@@ -30,4 +30,15 @@ urlpatterns = [
     path('payment-and-check/', views.PaymentAndCheckView.as_view(), name='payment-and-check'),
 
     path('investor-products/', views.UserPurchasedProductsView.as_view(), name='investor-products'),
+    ##############################################################################################
+
+    path('create-product_1/', views.ProductCreateView.as_view(), name='create-product'),
+
+    path('api/public-products/', views.PublicProductAPIView.as_view(), name='public-products'),
+    path('api/private-products/', views.PrivateProductAPIView.as_view(), name='private-products'),
+
+    # path('api/unlock-product/<int:product_id>/', views.UnlockPrivateProductAPIView.as_view(), name='unlock-product'),
+    
+    path('api/payment-unlock/', views.PaymentAndUnlockView.as_view(), name='payment-unlock'),
+
 ]
