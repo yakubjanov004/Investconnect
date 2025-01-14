@@ -1,34 +1,20 @@
-*/migrations/*
-*/migrations/__init__.py
-
-media/
-static/
-
+# Python virtual environment
 venv/
 
-
-*.sqlite3
-*.log
-*.db
-
+# Python cache fayllari
+__pycache__/
 *.pyc
 *.pyo
-__pycache__/
 
-.vscode/
-.idea/
+# Django staticfiles
+staticfiles/
 
-.DS_Store
-Thumbs.db
+# Django migratsiya fayllari
+*.sqlite3
+db.sqlite3
+migrations/
 
-*.bak
-*.swp
-*.swo
-*.tmp
-
-product_file/
-category/
-user_profile/
-product_images/
-products/
-product_prototype/
+# Hujjatlar va rasmlar
+*.pptx
+*.pdf
+*.png

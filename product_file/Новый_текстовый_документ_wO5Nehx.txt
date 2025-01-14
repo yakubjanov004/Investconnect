@@ -1,0 +1,45 @@
+{
+    "username": "",
+    "phone": "",
+    "role": "",
+    "password": ""
+}
+
+
+
+{
+    "user": ,
+    "code": ""
+}
+
+
+
+{
+    "phone": "",
+    "password": ""
+}
+
+
+{
+    "phone": "+998901235423"
+}
+
+
+{
+    "user": 2,
+    "name": "Mahsulot nomi",
+    "rendement": "90%",
+    "location": "Toshkent, O'zbekiston",
+    "description": "Bu mahsulot haqida qisqacha tavsif.",
+    "category": 1,
+    "price": 1000.50,
+    "product_file": null,
+    "product_images": [
+        "image_1.jpg",
+        "image_2.jpg",
+        "image_3.jpg",
+        "image_4.jpg",
+        "image_5.jpg"
+    ]
+}
+
