@@ -1,6 +1,6 @@
 # Python virtual environment
 venv/
-
+media/
 # Python cache fayllari
 __pycache__/
 *.pyc
