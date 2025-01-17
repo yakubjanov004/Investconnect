@@ -258,4 +258,15 @@ class ProductPublicSerializer(serializers.ModelSerializer):
 class ProductPrivateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product_1
-        fields = '__all__'
+        exclude = [
+            'updated_at',
+            'id',
+            'name',
+            'description',
+            'location',
+            'image',
+            'price',
+            'rendement',
+            'short_description',
+            'investment_range',
+        ]

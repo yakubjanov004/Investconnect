@@ -501,54 +501,42 @@ class PrivateProductDetailsView(APIView):
     permission_classes = [IsAuthenticated]  # Faqat autentifikatsiya qilingan foydalanuvchilar
 
     def get(self, request, product_id):
-        print("Start: Foydalanuvchi autentifikatsiya qilinganmi?")
-
         try:
             product = models.Product_1.objects.get(id=product_id)
-            print(f"Mahsulot topildi: {product}")
         except models.Product_1.DoesNotExist:
-            print(f"Mahsulot {product_id} topilmadi!")
             return Response({'detail': 'Mahsulot topilmadi.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Agar foydalanuvchi superuser bo'lsa va mahsulotni o'zi yaratgan bo'lsa
         if request.user.is_superuser and product.user == request.user:
-            print("Superuser o'z mahsulotini yaratgan. To'lov talab qilinmaydi.")
             serializer = serializers.ProductPrivateSerializer(product)
-            return Response({"message": "Siz o'zingiz yaratgan mahsulotni ko'rmoqdasiz", "product": serializer.data})
+            return Response(serializer.data)
 
         # Agar foydalanuvchi superuser bo'lsa, to'lov holatini tekshirmaymiz
         if request.user.is_superuser:
-            print("Foydalanuvchi superuser. To'lov holatini tekshiryapmiz...")
 
             payment = models.Payment.objects.filter(investor=request.user, product=product, is_active=True).first()
             if payment:
                 serializer = serializers.ProductPrivateSerializer(product)
-                return Response({"message": "To'lov qilingan mahsulot", "product": serializer.data})
+                return Response(serializer.data)
             else:
                 return Response({'detail': 'Superuser sifatida ham to\'lov qilmagansiz.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Mahsulotni yaratgan foydalanuvchi uchun to'lov talab qilinmasin
         if product.user == request.user:
-            print(f"Foydalanuvchi o'z mahsulotini yaratgan. To'lov talab qilinmaydi.")
             serializer = serializers.ProductPrivateSerializer(product)
-            return Response({"message": "Siz o'zingiz yaratgan mahsulotni ko'rmoqdasiz", "product": serializer.data})
+            return Response(serializer.data)
 
-        print("Foydalanuvchi superuser emas, to'lov holatini tekshiryapmiz...")
 
         # Foydalanuvchining to'lov holatini tekshirish
         try:
             payment = models.Payment.objects.filter(investor=request.user, product=product, is_active=True).first()
-            print(f"Foydalanuvchi to'lov holati: {payment}")
 
             if not payment:
-                print("Foydalanuvchi to'lov qilmagan!")
                 return Response({'detail': 'Siz to\'lov qilmagansiz.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         except models.Payment.DoesNotExist:
-            print("Foydalanuvchi to'lov ma'lumotlari topilmadi!")
             return Response({'detail': 'To\'lov ma\'lumotlari topilmadi.'}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
         # Mahsulotni seriyalash va javobga qaytarish
         serializer = serializers.ProductPrivateSerializer(product)
-        print(f"Mahsulot seriyalash: {serializer.data}")
         return Response(serializer.data)
