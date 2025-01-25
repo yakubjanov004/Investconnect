@@ -8,6 +8,7 @@ __pycache__/
 
 # Django staticfiles
 staticfiles/
+media/
 
 # Django migratsiya fayllari
 *.sqlite3
