@@ -7,13 +7,6 @@ class UserModelAdmin(admin.ModelAdmin):
     list_filter = ('role', 'status')  
     ordering = ('id',)  
 
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'location', 'price', 'category')  
-    search_fields = ('name', 'user__username', 'category__name')  
-    list_filter = ('category',)  
-    ordering = ('id',)  
-
-
 class InformationAdmin(admin.ModelAdmin):
     list_display = ('id', 'product_name',)  
     search_fields = ('product__name',)     
@@ -47,8 +40,17 @@ class CommentAdmin(admin.ModelAdmin):
     short_description.short_description = "Sharh"
 
 
+
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'price', 'user', 'rendement')
+    search_fields = ('name', 'category__name')
+    list_filter = ('category', 'user')
+
 admin.site.register(models.UserModel, UserModelAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Comment, CommentAdmin)
 admin.site.register(models.Product, ProductAdmin)
 admin.site.register(models.PrivateInformation, InformationAdmin)
+admin.site.register(models.Payment)
+admin.site.register(models.Product_1)

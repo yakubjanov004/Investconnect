@@ -23,7 +23,6 @@ urlpatterns = [
     path('products/<int:id>/', views.PublicProductsView.as_view(), name='product-detail'),
     path('products/category/', views.CategoryListView.as_view(), name='category-list'),
 
-    path('private/information/create', views.CreatInformationView.as_view(), name='private_information-creat'),
 
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
@@ -31,4 +30,15 @@ urlpatterns = [
     path('payment-and-check/', views.PaymentAndCheckView.as_view(), name='payment-and-check'),
 
     path('investor-products/', views.UserPurchasedProductsView.as_view(), name='investor-products'),
+    ##############################################################################################
+
+    path('create-product_1/', views.ProductCreateView.as_view(), name='create-product'),
+
+    path('api/public-products/', views.PublicProductAPIView.as_view(), name='public-products'),
+    path('api/private-products/', views.PrivateProductAPIView.as_view(), name='private-products'),
+
+    # path('api/unlock-product/<int:product_id>/', views.UnlockPrivateProductAPIView.as_view(), name='unlock-product'),
+    
+    path('api/payment-unlock/', views.PaymentAndUnlockView.as_view(), name='payment-unlock'),
+
 ]
