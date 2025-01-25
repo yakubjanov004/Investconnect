@@ -195,7 +195,7 @@ class UserProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product_1
         fields = (
-            'id', 'name', 'image', 'category', 'price', 'created_at' 
+            'id', 'name', 'image', 'category', 'price', 'created_at', 'location' 
         )
 
 
