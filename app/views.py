@@ -1,3 +1,4 @@
+import django_filters
 from rest_framework.generics import ListAPIView,CreateAPIView,UpdateAPIView,RetrieveUpdateAPIView
 from app import serializers
 from app import models
@@ -183,12 +184,21 @@ class UserModelListAPIView(ListAPIView):
 
 
 
+class ProductFilter(django_filters.FilterSet):
+    location = django_filters.CharFilter(field_name="location", lookup_expr="icontains")  
+    min_price = django_filters.NumberFilter(field_name="price", lookup_expr="gte")
+    max_price = django_filters.NumberFilter(field_name="price", lookup_expr="lte")
+
+    class Meta:
+        model = models.Product_1
+        fields = ['location', 'min_price', 'max_price', 'category']
+
 class ProductListAPIView(ListAPIView):
     serializer_class = serializers.ProductListSerializer
     queryset = models.Product_1.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ('category__name',)
-    search_fields = ('name', 'location', 'price',)
+    filterset_class = ProductFilter  
+    search_fields = ('name', )
 
 
 
