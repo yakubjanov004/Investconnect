@@ -4,21 +4,21 @@ from .models import UserModel
 from app import models
 from rest_framework.exceptions import ValidationError
 from django.core.validators import RegexValidator
-from django.core.files.base import ContentFile
-import requests
-import os
-
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('id', 'firstname', 'phone', 'lastname', 'email', 'role')
 
+
+
 class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserModel
         fields = ('firstname', 'lastname', 'role')
         read_only = True
+
+
 
 class Userserializer(serializers.Serializer):
     username = serializers.CharField(max_length=30, validators=[ 
@@ -37,9 +37,12 @@ class Userserializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+
 class VerifySerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter(status='new'))
     code = serializers.CharField()
+
+
 
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
@@ -61,10 +64,6 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-
-
-
-
 class GetCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
@@ -74,15 +73,14 @@ class GetCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    # user = GetUserSerializer(read_only=True)
-    # contract = ContractNameSerializer(read_only=True)
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
-        model = models.Product
+        model = models.Product_1
         fields = (
-            'id', 'name','image','category', 'price'
+            'id', 'name', 'category', 'price', 'image', 'location', 'rendement'
         )
+
 
 class ProductInforationNameSerializer(serializers.ModelSerializer):
     class Meta:
@@ -90,37 +88,41 @@ class ProductInforationNameSerializer(serializers.ModelSerializer):
         fields = ('name',)
         read_only = True
 
-class ProductinformationSerializer(serializers.ModelSerializer):
-    product = ProductInforationNameSerializer(read_only=True)
 
-    class Meta:
-        model = models.PrivateInformation
-        exclude = ('created_at',  'updated_at')
+
+
 
 class PrivateInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PrivateInformation
-        fields = ('kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi')
+        fields = ['kampanya_egasi', 'kontact', 'campany_name', 'oylik_daromadi', 'soff_foydasi']
 
 
-class CreateProductSerializer(serializers.ModelSerializer):
-    private_information = PrivateInformationSerializer()
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    private_information = PrivateInformationSerializer(read_only=True)  
 
     class Meta:
         model = models.Product
-        fields = (
-            'user', 'name', 'rendement', 'location', 'image',
-            'description', 'category','price',
-            'private_information'
-        )
+        fields = [
+            'name', 'description', 'location', 'user', 'category',
+            'rendement', 'image', 'price', 'product_file', 'private_information'
+        ]
 
     def create(self, validated_data):
-        private_information_data = validated_data.pop('private_information', None)
+        private_info_data = validated_data.pop('private_information', None)
+
         product = models.Product.objects.create(**validated_data)
-        if private_information_data:
-            private_info = models.PrivateInformation.objects.create(product=product, **private_information_data)
-            product.private_information = private_info
+
+        if private_info_data:
+            models.PrivateInformation.objects.create(product=product, **private_info_data)
+
         return product
+
+
+
+
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -139,6 +141,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ('firstname', 'lastname', 'phone',)
 
 
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
@@ -149,37 +152,35 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class ProfilDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('username', 'firstname', 'lastname', 'profile_image', 'phone', 'email', 'role')
+        fields = ('username', 'firstname', 'lastname', 'profile_image', 'email', 'role')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.context['request'].method in ['PUT', 'PATCH']:
+            self.fields.pop('role', None)
 
     def validate_profile_image(self, value):
-        if isinstance(value, str) and value.startswith('http'):  
-            response = requests.get(value)
-            if response.status_code != 200:
-                raise serializers.ValidationError("The URL is not accessible.")
-        elif value and not value.name.endswith(('.jpg', '.png', '.jpeg')):
+        if value and not value.name.endswith(('.jpg', '.png', '.jpeg',)):
             raise serializers.ValidationError("Only image files (jpg, png, jpeg) are allowed.")
         return value
 
     def update(self, instance, validated_data):
         profile_image = validated_data.pop('profile_image', None)
         if profile_image:
-            if isinstance(profile_image, str) and profile_image.startswith('http'):  
-                response = requests.get(profile_image)
-                if response.status_code == 200:
-                    file_name = os.path.basename(profile_image)
-                    instance.profile_image.save(file_name, ContentFile(response.content), save=False)
-            else:
-                instance.profile_image = profile_image
+            instance.profile_image = profile_image
+        
         instance = super().update(instance, validated_data)
         instance.save()
         return instance
 
-CreateProductSerializer
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Category
         fields = ['id', 'name', "img"]
+
+
 
 class InformationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -187,18 +188,85 @@ class InformationSerializer(serializers.ModelSerializer):
         exclude = ('created_at',  'updated_at')
 
 
+
 class UserProductSerializer(serializers.ModelSerializer):
     category = GetCategorySerializer(read_only=True)
 
     class Meta:
-        model = models.Product
+        model = models.Product_1
         fields = (
-            'id', 'name', 'degree','image','category', 'price'
+            'id', 'name', 'image', 'category', 'price', 'created_at', 'location' 
         )
+
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Product
-        fields = ['id', 'name', 'price', 'image']
+        model = models.Product_1
+        fields = ['id', 'name', 'price', 'image', 'created_at' ]
+
+                            # /////--------------------------------########/////---------------------#
 
 
+class ProductCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Product_1
+        fields = [
+            'id', 
+            'name', 
+            'description', 
+            'location', 
+            'image', 
+            'user', 
+            'category', 
+            'rendement', 
+            'price', 
+            'is_active',
+            'short_description',  # Umumiy ma'lumotlar
+            'investment_range',   # Kerakli sarmoya diapazoni
+            'team_info',          # Jamoa haqida umumiy ma'lumot
+            'business_plan',      # Batafsil biznes-reja
+            'use_of_investment',  # Sarmoya foydalanish rejalari
+            'financial_forecasts', # Moliyaviy prognozlar
+            'prototype_demo',     # Prototip yoki demo
+            'team_details',       # Jamoa a'zosining rezume va tajribasi
+            'market_analysis',    # Bozor va raqobat tahlili
+            'legal_documents',    # Yuridik hujjatlar
+            'contact_info',       # Bog'lanish ma'lumotlari
+        ]
+
+
+
+# Serializer for open data
+class ProductPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product_1
+        fields = [
+            'id',
+            'name',
+            'description',
+            'location',
+            'image',
+            'price',
+            'rendement',
+            'short_description',
+            'investment_range',
+        ]
+
+# Serializer for private data
+class ProductPrivateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product_1
+        exclude = [
+            'updated_at',
+            'id',
+            'name',
+            'description',
+            'location',
+            'image',
+            'price',
+            'rendement',
+            'short_description',
+            'investment_range',
+        ]
