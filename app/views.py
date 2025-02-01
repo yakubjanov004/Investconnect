@@ -188,7 +188,7 @@ class ProductListAPIView(ListAPIView):
     queryset = models.Product_1.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ('category__name',)
-    search_fields = ('name',)
+    search_fields = ('name', 'location', 'price',)
 
 
 
